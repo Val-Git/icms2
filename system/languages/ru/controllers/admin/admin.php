@@ -9,7 +9,8 @@
     define('LANG_CP_DASHBOARD_SI_PHP',          'Версия PHP');
     define('LANG_CP_DASHBOARD_SI_ML',           'Лимит памяти');
     define('LANG_CP_DASHBOARD_SI_IP',           'IP адрес сервера');
-    define('LANG_CP_DASHBOARD_SI_ROOT',         'Папка сайта');
+    define('LANG_CP_DASHBOARD_SI_ROOT',         'Директория сайта');
+    define('LANG_CP_DASHBOARD_SI_SESSION',      'Директория сессий');
     define('LANG_CP_DASHBOARD_SI_MAX',          'Макс. размер загрузки');
     define('LANG_CP_DASHBOARD_SI_ION',          'Установлен IonCube Loader');
     define('LANG_CP_DASHBOARD_SI_ZEND',         'Установлен Zend Optimizer');
@@ -50,6 +51,7 @@
     define('LANG_CP_CTYPES_EDIT',               'Изменить тип контента');
     define('LANG_CP_CTYPE_CREATED',             'Тип контента &laquo;%s&raquo; создан');
     define('LANG_CP_CTYPE_DELETE_CONFIRM',      'Удалить тип контента "{title}"?');
+    define('LANG_CP_CTYPE_ERROR_NAME',          'Не должно называться именем существующего компонента');
 
     define('LANG_CP_CTYPE_SETTINGS',            'Настройки');
     define('LANG_CP_CTYPE_LABELS',              'Заголовки');
@@ -138,6 +140,7 @@
 
     define('LANG_CP_ITEMVIEW_OPTIONS',          'Просмотр записи');
     define('LANG_CP_ITEMVIEW_ON',               'Просмотр записи включен');
+    define('LANG_CP_ITEMVIEW_FIELDS_GROUP',     'Группировать поля');
     define('LANG_CP_ITEMVIEW_HITS_ON',			'Считать количество просмотров');
     define('LANG_CP_ITEMVIEW_APPEND_HTML',      'Выводить HTML в конце записи');
     define('LANG_CP_ITEMVIEW_APPEND_HTML_HINT', 'Введенный здесь HTML код будет выводиться под каждой записью');
@@ -190,6 +193,14 @@
     define('LANG_CP_FIELD_PRIVATE',             'Показывать поле только автору записи');
     define('LANG_CP_FIELD_GROUPS_READ',         'Доступ для чтения');
     define('LANG_CP_FIELD_GROUPS_EDIT',         'Доступ для изменения');
+    define('LANG_CP_FIELD_WRAP',               'Обтекание');
+    define('LANG_CP_FIELD_WRAP_TYPE',          'Тип');
+    define('LANG_CP_FIELD_WRAP_LTYPE',         'Следующее поле справа от текущего');
+    define('LANG_CP_FIELD_WRAP_RTYPE',         'Следующее поле слева от текущего');
+    define('LANG_CP_FIELD_WRAP_NTYPE',         'Не участвовать в обтекании');
+    define('LANG_CP_FIELD_WRAP_ATYPE',         'Авто');
+    define('LANG_CP_FIELD_WRAP_WIDTH',         'Ширина блока поля');
+    define('LANG_CP_FIELD_WRAP_WIDTH_HINT',    'Не указано - автоматическая ширина. Указывайте вместе с единицей измерения, например 200px, 60% и т.п.');
 
     define('LANG_CP_PROPS_NO_CATS',             'Тип контента &laquo;%s&raquo; не содержит категорий.');
     define('LANG_CP_PROPS_NO_CATS_ADD',         '<a href="%s">Создайте категории</a> чтобы добавлять свойства.');
@@ -273,6 +284,7 @@
     define('LANG_CP_USER_FIND_BYIP',            'Найти всех с таким ip');
     define('LANG_CP_USER_RIPE_SEARCH',          'Найти в базе RIPE');
 
+    define('LANG_CP_CONTROLLERS_OPTIONS',       'Настройки компонента');
     define('LANG_CP_CONTROLLERS_ADD',           'Установить компонент');
     define('LANG_CP_ERR_BACKEND_NOT_FOUND',     'Компонент &laquo;%s&raquo; не имеет настроек');
 
@@ -286,8 +298,9 @@
     define('LANG_CP_SETTINGS_MISC',             'Прочие');
     define('LANG_CP_SETTINGS_SECURITY',         'Безопасность');
 
+    define('LANG_CP_SETTINGS_USER_CHANGE_LANG', 'Разрешить смену языка пользователями (подстановкой префикса в URL)');
     define('LANG_CP_SETTINGS_ALLOW_IPS',        'Разрешенные ip адреса для доступа в админку');
-    define('LANG_CP_SETTINGS_ALLOW_IPS_HINT',   'Каждый с новой строки. Не указано - разрешено всем.');
+    define('LANG_CP_SETTINGS_ALLOW_IPS_HINT',   'Каждый с новой строки. Не указано - разрешено всем. Текущий ip адрес: %s');
     define('LANG_CP_SETTINGS_DETECT_IP_KEY',    'Как определять ip посетителя');
     define('LANG_CP_SETTINGS_DETECT_IP_KEY_HINT', 'Ключ массива $_SERVER, содержащий реальный ip адрес посетителя. Не меняйте это значение, если не уверены. Значение по умолчанию подходит для большинства. Но, например, для CloudFlare необходимо указать HTTP_CF_CONNECTING_IP');
     define('LANG_CP_SETTINGS_SITE_ENABLED',     'Сайт включен');
@@ -313,8 +326,10 @@
     define('LANG_CP_SETTINGS_CACHE_CLEAN_MERGED',  '&mdash; <a href="%s">Очистить кеш</a>');
     define('LANG_CP_SETTINGS_MERGED_CLEANED',   'Папка <b>%s</b> успешно очищена');
     define('LANG_CP_SETTINGS_MERGED_CLEAN_FAIL','Не удалось очистить папку <b>%s</b>. Проверьте права или очистите ее вручную');
-	define('LANG_CP_SETTINGS_CTYPE_DEF',        'Тип контента по-умолчанию');
-	define('LANG_CP_SETTINGS_CTYPE_DEF_HINT',	'В URL записей данного типа контента не будет добавляться его системное имя');
+    define('LANG_CP_SETTINGS_CACHE_CLEAN_SUCCESS', 'Кеш успешно очищен');
+    define('LANG_CP_SETTINGS_CACHE_CLEAN_FAIL', 'Ошибка очистки кеша');
+    define('LANG_CP_SETTINGS_CTYPE_DEF',        'Тип контента по-умолчанию');
+    define('LANG_CP_SETTINGS_CTYPE_DEF_HINT',	'В URL записей данного типа контента не будет добавляться его системное имя');
     define('LANG_CP_SETTINGS_FP_SHOW',          'Выводить на главной странице');
     define('LANG_CP_SETTINGS_FP_SHOW_NONE',     'Только виджеты');
     define('LANG_CP_SETTINGS_FP_SHOW_PROFILE',  'Профиль / авторизация');
@@ -349,6 +364,8 @@
     define('LANG_CP_SETTINGS_NOT_WRITABLE',     'Ошибка перезаписи файла конфигурации');
     define('LANG_CP_SETTINGS_TPL_NOT_WRITABLE', 'Файл конфигурации темы недоступен для записи');
     define('LANG_CP_SAVE_SUCCESS',              'Настройки успешно сохранены');
+    define('LANG_CP_ORDER_SUCCESS',             'Порядок успешно сохранён');
+    define('LANG_CP_PERMISSIONS_SUCCESS',       'Правила доступа успешно сохранены');
 
     define('LANG_CP_SETTINGS_DEBUG_MODE',       'Включить режим отладки');
     define('LANG_CP_SETTINGS_EMULATE_LAG',      'Имитировать сетевые задержки');
@@ -373,16 +390,21 @@
     define('LANG_CP_INSTALL_NOT_ZIP_HINT',      'Автоматическая распаковка архива не возможна');
     define('LANG_CP_INSTALL_NOT_ZIP_FIX',       'Обратитесь к хостеру с просьбой обеспечить работу класса <b>ZipArchive</b> для PHP на вашем сервере');
     define('LANG_CP_INSTALL_NOT_ZIP_WA',   'Смените расширение пакета на <b>.zip</b>, распакуйте и загрузите содержимое в папку <b>%s</b>');
+    define('LANG_CP_INSTALL_ERROR',             'Ошибка установки пакета');
+    define('LANG_CP_INSTALL_PERM_ERROR',        'Файл %s недоступен для чтения');
     define('LANG_CP_INSTALL_ZIP_ERROR',         'Ошибка распаковки пакета');
     define('LANG_CP_INSTALL_FTP_NOTICE',        'Для загрузки содержимого пакета в нужные папки сайта необходимо указать реквизиты FTP-пользователя, имеющего права на создание папок и файлов.');
     define('LANG_CP_INSTALL_FTP_PRIVACY',       'Введенные реквизиты никуда не передаются и могут храниться в сессии только до конца текущего сеанса');
-
     define('LANG_CP_PACKAGE_AUTHOR',            'Автор пакета');
     define('LANG_CP_PACKAGE_DESCRIPTION',       'Описание пакета');
     define('LANG_CP_PACKAGE_CONTENTS',          'Содержимое пакета');
     define('LANG_CP_PACKAGE_DEPENDS',           'Зависимости пакета');
     define('LANG_CP_PACKAGE_DEPENDS_CORE',      'Требуемая версия ядра');
-
+    define('LANG_CP_PACKAGE_DEPENDENT_TYPE',      'Требуется установленный %s <a href="%s" target="_blank">%s</a>');
+    define('LANG_CP_PACKAGE_DEPENDENT_COMPONENT', 'компонент');
+    define('LANG_CP_PACKAGE_DEPENDENT_WIDGET',    'виджет');
+    define('LANG_CP_INSTALLED',     'установлен');
+    define('LANG_CP_NOT_INSTALLED', 'не установлен');
     define('LANG_CP_PACKAGE_DEPENDS_PACKAGE',   'Требуемая версия установленного пакета');
     define('LANG_CP_PACKAGE_TYPE_COMPONENT_INSTALL', 'Пакет установки компонента');
     define('LANG_CP_PACKAGE_TYPE_COMPONENT_UPDATE', 'Пакет обновления компонента');
@@ -422,7 +444,7 @@
     define('LANG_CP_3RDPARTY_CREDITS',          'При участии');
 
     define('LANG_MODERATOR_ADD',             'Добавить модератора');
-    define('LANG_MODERATOR_ADD_HINT',        'Введите имя пользователя которого вы хотите назначить модератором');
+    define('LANG_MODERATOR_ADD_HINT',        'Введите email пользователя, которого вы хотите назначить модератором');
     define('LANG_MODERATOR_APPROVED_COUNT',  'Одобрено');
     define('LANG_MODERATOR_DELETED_COUNT',   'Удалено');
     define('LANG_MODERATOR_IDLE_COUNT',      'В процессе');
@@ -473,6 +495,7 @@
     define('LANG_HELP_URL_WIDGETS_CFG',             'http://docs.instantcms.ru/manual/widgets/config');
     define('LANG_HELP_URL_WIDGETS_PAGES',           'http://docs.instantcms.ru/manual/widgets/pages');
     define('LANG_HELP_URL_COMPONENTS',              'http://docs.instantcms.ru/manual/components');
+    define('LANG_HELP_URL_INSTALL',                 'http://docs.instantcms.ru/manual/addons');
     define('LANG_HELP_URL_COM_AUTH',                'http://docs.instantcms.ru/manual/components/auth');
     define('LANG_HELP_URL_COM_ACTIVITY',            'http://docs.instantcms.ru/manual/components/activity');
     define('LANG_HELP_URL_COM_GROUPS',              'http://docs.instantcms.ru/manual/components/groups');
@@ -495,7 +518,6 @@
     define('LANG_HELP_URL_SETTINGS_GLOBAL',         'http://docs.instantcms.ru/manual/settings/global');
     define('LANG_HELP_URL_SETTINGS_SCHEDULER',      'http://docs.instantcms.ru/manual/settings/scheduler');
     define('LANG_HELP_URL_SETTINGS_SCHEDULER_TASK', 'http://docs.instantcms.ru/manual/settings/scheduler/task');
-
     define('LANG_ZIP_ERROR_10', 'Файл уже существует');
     define('LANG_ZIP_ERROR_21', 'Несовместимый ZIP-архив');
     define('LANG_ZIP_ERROR_18', 'Недопустимый аргумент');
@@ -505,3 +527,4 @@
     define('LANG_ZIP_ERROR_11', 'Невозможно открыть файл');
     define('LANG_ZIP_ERROR_5', 'Ошибка чтения');
     define('LANG_ZIP_ERROR_4', 'Ошибка поиска');
+    define('LANG_INSTALL_NOTICE_SYSTEM_FILE', 'Внимание! Пакет заменяет некоторые системные файлы CMS. Не рекомендуется продолжать установку, если разработчик пакета Вам неизвестен.');

@@ -15,7 +15,9 @@
     <?php $this->addMainJS("templates/{$this->name}/js/jquery-modal.js"); ?>
     <?php $this->addMainJS("templates/{$this->name}/js/core.js"); ?>
     <?php $this->addMainJS("templates/{$this->name}/js/modal.js"); ?>
-    <?php $this->addMainJS("templates/{$this->name}/js/messages.js"); ?>
+    <?php if (cmsUser::isLogged()){ ?>
+        <?php $this->addMainJS("templates/{$this->name}/js/messages.js"); ?>
+    <?php } ?>
     <!--[if lt IE 9]>
         <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
         <script src="http://css3-mediaqueries-js.googlecode.com/svn/trunk/css3-mediaqueries.js"></script>
@@ -102,10 +104,11 @@
         <?php if ($config->debug && cmsUser::isAdmin()){ ?>
             <div id="sql_debug" style="display:none">
                 <div id="sql_queries">
+                    <div id="sql_stat"><?php echo $core->db->getStat(); ?></div>
                     <?php foreach($core->db->query_list as $sql) { ?>
                         <div class="query">
                             <div class="src"><?php echo $sql['src']; ?></div>
-                            <?php echo nl2br($sql['sql']); ?>
+                            <?php echo nl2br(htmlspecialchars($sql['sql'])); ?>
                             <div class="query_time"><?php echo LANG_DEBUG_QUERY_TIME; ?> <span class="<?php echo (($sql['time']>=0.1) ? 'red_query' : 'green_query'); ?>"><?php echo number_format($sql['time'], 5); ?></span> <?php echo LANG_SECOND10 ?></div>
                         </div>
                     <?php } ?>
@@ -130,11 +133,11 @@
                     </span>
                     <?php if ($config->debug && cmsUser::isAdmin()){ ?>
                         <span class="item">
-                            SQL: <a href="#sql_debug" class="ajax-modal"><?php echo $core->db->query_count; ?></a>
+                            SQL: <a href="#sql_debug" title="SQL dump" class="ajax-modal"><?php echo $core->db->query_count; ?></a>
                         </span>
                         <?php if ($config->cache_enabled){ ?>
                             <span class="item">
-                                Cache: <?php echo cmsCache::getInstance()->query_count; ?>
+                                Cache: <a href="<?php echo href_to('admin', 'cache_delete', $config->cache_method);?>" title="Clear cache"><?php echo cmsCache::getInstance()->query_count; ?></a>
                             </span>
                         <?php } ?>
                         <span class="item">

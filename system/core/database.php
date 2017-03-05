@@ -68,7 +68,9 @@ class cmsDatabase {
 	}
 
 	public function __destruct(){
-		$this->mysqli->close();
+        if($this->ready()){
+            $this->mysqli->close();
+        }
 	}
 
     public function __get($name) {
@@ -94,6 +96,10 @@ class cmsDatabase {
         }
 
         $this->mysqli->set_charset('utf8');
+
+        if(!empty($config->clear_sql_mode)){
+            $this->mysqli->query("SET sql_mode=''");
+        }
 
         $this->setTimezone();
 
@@ -124,6 +130,16 @@ class cmsDatabase {
         }
 
 		return true;
+
+	}
+
+    public function getStat(){
+
+        if (isset($this->mysqli->stat)){
+            return $this->mysqli->stat;
+        }
+
+		return '';
 
 	}
 
@@ -706,6 +722,7 @@ class cmsDatabase {
                   `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
                   `parent_id` int(11) UNSIGNED DEFAULT NULL,
                   `title` varchar(200) NULL DEFAULT NULL,
+                  `description` text NULL DEFAULT NULL,
                   `slug` varchar(255) NULL DEFAULT NULL,
                   `slug_key` varchar(255) NULL DEFAULT NULL,
                   `seo_keys` varchar(256) DEFAULT NULL,

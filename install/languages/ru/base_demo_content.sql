@@ -1,21 +1,21 @@
 INSERT INTO `{#}activity` (`id`, `type_id`, `user_id`, `group_id`, `subject_title`, `subject_id`, `subject_url`, `reply_url`, `images`, `images_count`, `date_pub`, `is_private`, `is_parent_hidden`) VALUES
-(3, 13, 1, NULL, 'Эллиптический перигей в XXI веке', 1, '/articles/1-ellipticheskii-perigei-v-xxi-veke.html', NULL, NULL, NULL, DATE_SUB(NOW(),INTERVAL 13 DAY), 0, NULL),
-(6, 13, 1, NULL, 'Недонасыщенный алмаз: предпосылки и развитие', 4, '/articles/4-nedonasyschennyi-almaz-predposylki-i-razvitie.html', NULL, NULL, NULL, DATE_SUB(NOW(),INTERVAL 12 DAY), 0, NULL),
-(10, 12, 1, NULL, 'We are all made of stars © Moby', NULL, NULL, '/users/1?wid=1&reply=1', NULL, NULL, CURRENT_TIMESTAMP, 0, NULL),
-(17, 1, 1, NULL, 'О проекте', 1, '/pages/about.html', NULL, NULL, NULL, DATE_SUB(NOW(),INTERVAL 11 DAY), 0, NULL),
-(18, 1, 1, NULL, 'Правила сайта', 2, '/pages/rules.html', NULL, NULL, NULL, DATE_SUB(NOW(),INTERVAL 10 DAY), 0, NULL),
-(32, 17, 1, NULL, 'На улице 22 Партсъезда прорвало трубы с водой', 1, '/news/1-na-ulice-prorvalo-truby.html', NULL, NULL, NULL, DATE_SUB(NOW(),INTERVAL 9 DAY), 0, NULL),
-(33, 17, 1, NULL, 'Игрушки становятся дороже', 2, '/news/2-igrushki-stanovjatsja-dorozhe.html', NULL, NULL, NULL, DATE_SUB(NOW(),INTERVAL 8 DAY), 0, NULL),
-(34, 17, 1, NULL, 'В городе открыт сервис для ретро-автомобилей', 3, '/news/3-v-gorode-otkryt-servis-dlja-retro-avtomobilei.html', NULL, NULL, NULL, DATE_SUB(NOW(),INTERVAL 7 DAY), 0, NULL),
-(35, 17, 1, NULL, 'Дачный сезон на Урале официально начался', 4, '/news/4-dachnyi-sezon-otkryt.html', NULL, NULL, NULL, DATE_SUB(NOW(),INTERVAL 6 DAY), 0, NULL),
-(36, 17, 1, NULL, 'Бизнес ожидает снижения налогов', 5, '/news/5-snizhenie-nalogov-dlja-biznesa.html', NULL, NULL, NULL, DATE_SUB(NOW(),INTERVAL 5 DAY), 0, NULL),
-(37, 17, 1, NULL, 'Все больше россиян покупают дома за границей', 6, '/news/6-vse-bolshe-rossijan-pokupayut-nedvizhimost-za-granicei.html', NULL, NULL, NULL, DATE_SUB(NOW(),INTERVAL 4 DAY), 0, NULL),
-(38, 17, 1, NULL, 'Количество преступлений в России сокращается', 7, '/news/7-kolichestvo-prestuplenii-v-rossii-sokraschaetsja.html', NULL, NULL, NULL, DATE_SUB(NOW(),INTERVAL 3 DAY), 0, NULL),
-(40, 17, 1, NULL, 'Россияне стали первыми на Чемпионате Мира', 9, '/news/9-rossijane-stali-pervymi-na-chempionate-mira.html', NULL, NULL, NULL, DATE_SUB(NOW(),INTERVAL 2 DAY), 0, NULL),
-(56, 13, 1, NULL, 'Мифологический реципиент', 10, '/articles/10-mifologicheskii-recipient.html', NULL, NULL, NULL, DATE_SUB(NOW(),INTERVAL 1 DAY), 0, NULL),
-(57, 13, 1, NULL, 'Общественный анализ зарубежного опыта', 11, '/articles/11-obschestvennyi-analiz-zarubezhnogo-opyta.html', NULL, NULL, NULL, DATE_SUB(NOW(),INTERVAL 7 MINUTE), 0, NULL),
-(67, 14, 1, 1, 'Мой первый пост в сообществе', 5, '/posts/5-moi-pervyi-post-v-soobschestve.html', NULL, NULL, NULL, DATE_SUB(NOW(),INTERVAL 6 MINUTE), 0, NULL),
-(69, 16, 1, NULL, 'Продам квартиру в новостройке', 7, '/board/7-prodam-kvartiru-v-novostroike.html', NULL, NULL, NULL, DATE_SUB(NOW(),INTERVAL 5 MINUTE), 0, NULL);
+(3, 13, 1, NULL, 'Эллиптический перигей в XXI веке', 1, 'articles/1-ellipticheskii-perigei-v-xxi-veke.html', NULL, NULL, NULL, DATE_SUB(NOW(),INTERVAL 13 DAY), 0, NULL),
+(6, 13, 1, NULL, 'Недонасыщенный алмаз: предпосылки и развитие', 4, 'articles/4-nedonasyschennyi-almaz-predposylki-i-razvitie.html', NULL, NULL, NULL, DATE_SUB(NOW(),INTERVAL 12 DAY), 0, NULL),
+(10, 12, 1, NULL, 'We are all made of stars © Moby', NULL, NULL, 'users/1?wid=1&reply=1', NULL, NULL, CURRENT_TIMESTAMP, 0, NULL),
+(17, 1, 1, NULL, 'О проекте', 1, 'pages/about.html', NULL, NULL, NULL, DATE_SUB(NOW(),INTERVAL 11 DAY), 0, NULL),
+(18, 1, 1, NULL, 'Правила сайта', 2, 'pages/rules.html', NULL, NULL, NULL, DATE_SUB(NOW(),INTERVAL 10 DAY), 0, NULL),
+(32, 17, 1, NULL, 'На улице 22 Партсъезда прорвало трубы с водой', 1, 'news/1-na-ulice-prorvalo-truby.html', NULL, NULL, NULL, DATE_SUB(NOW(),INTERVAL 9 DAY), 0, NULL),
+(33, 17, 1, NULL, 'Игрушки становятся дороже', 2, 'news/2-igrushki-stanovjatsja-dorozhe.html', NULL, NULL, NULL, DATE_SUB(NOW(),INTERVAL 8 DAY), 0, NULL),
+(34, 17, 1, NULL, 'В городе открыт сервис для ретро-автомобилей', 3, 'news/3-v-gorode-otkryt-servis-dlja-retro-avtomobilei.html', NULL, NULL, NULL, DATE_SUB(NOW(),INTERVAL 7 DAY), 0, NULL),
+(35, 17, 1, NULL, 'Дачный сезон на Урале официально начался', 4, 'news/4-dachnyi-sezon-otkryt.html', NULL, NULL, NULL, DATE_SUB(NOW(),INTERVAL 6 DAY), 0, NULL),
+(36, 17, 1, NULL, 'Бизнес ожидает снижения налогов', 5, 'news/5-snizhenie-nalogov-dlja-biznesa.html', NULL, NULL, NULL, DATE_SUB(NOW(),INTERVAL 5 DAY), 0, NULL),
+(37, 17, 1, NULL, 'Все больше россиян покупают дома за границей', 6, 'news/6-vse-bolshe-rossijan-pokupayut-nedvizhimost-za-granicei.html', NULL, NULL, NULL, DATE_SUB(NOW(),INTERVAL 4 DAY), 0, NULL),
+(38, 17, 1, NULL, 'Количество преступлений в России сокращается', 7, 'news/7-kolichestvo-prestuplenii-v-rossii-sokraschaetsja.html', NULL, NULL, NULL, DATE_SUB(NOW(),INTERVAL 3 DAY), 0, NULL),
+(40, 17, 1, NULL, 'Россияне стали первыми на Чемпионате Мира', 9, 'news/9-rossijane-stali-pervymi-na-chempionate-mira.html', NULL, NULL, NULL, DATE_SUB(NOW(),INTERVAL 2 DAY), 0, NULL),
+(56, 13, 1, NULL, 'Мифологический реципиент', 10, 'articles/10-mifologicheskii-recipient.html', NULL, NULL, NULL, DATE_SUB(NOW(),INTERVAL 1 DAY), 0, NULL),
+(57, 13, 1, NULL, 'Общественный анализ зарубежного опыта', 11, 'articles/11-obschestvennyi-analiz-zarubezhnogo-opyta.html', NULL, NULL, NULL, DATE_SUB(NOW(),INTERVAL 7 MINUTE), 0, NULL),
+(67, 14, 1, 1, 'Мой первый пост в сообществе', 5, 'posts/5-moi-pervyi-post-v-soobschestve.html', NULL, NULL, NULL, DATE_SUB(NOW(),INTERVAL 6 MINUTE), 0, NULL),
+(69, 16, 1, NULL, 'Продам квартиру в новостройке', 7, 'board/7-prodam-kvartiru-v-novostroike.html', NULL, NULL, NULL, DATE_SUB(NOW(),INTERVAL 5 MINUTE), 0, NULL);
 
 INSERT INTO `{#}activity_types` (`id`, `is_enabled`, `controller`, `name`, `title`, `description`) VALUES
 (13, 1, 'content', 'add.articles', 'Добавление статей', 'добавляет статью %s'),
@@ -56,7 +56,7 @@ INSERT INTO `{#}content_types` (`id`, `title`, `name`, `description`, `is_date_r
 (10, 'Новости', 'news', 'Информационные сообщения', NULL, 1, NULL, 1, 1, NULL, NULL, NULL, 1, NULL, 1, NULL, 1, 1, 1, 1, 1, '{id}-{title}', '---\nis_cats_change: 1\nis_cats_open_root: null\nis_cats_only_last: null\nis_show_cats: null\nis_tags_in_list: null\nis_tags_in_item: 1\nis_rss: 1\nlist_on: 1\nprofile_on: 1\nlist_show_filter: null\nlist_expand_filter: null\nlist_style: featured\nitem_on: 1\nis_cats_keys: null\nis_cats_desc: null\nis_cats_auto_url: 1\n', '---\none: новость\ntwo: новости\nmany: новостей\ncreate: новость\nlist:\nprofile:\n', NULL, NULL, NULL, NULL, NULL);
 
 INSERT INTO `{#}con_albums` (`id`, `title`, `content`, `slug`, `seo_keys`, `seo_desc`, `seo_title`, `tags`, `date_pub`, `date_last_modified`, `date_pub_end`, `is_pub`, `hits_count`, `user_id`, `parent_id`, `parent_type`, `parent_title`, `parent_url`, `is_parent_hidden`, `category_id`, `folder_id`, `is_comments_on`, `comments`, `rating`, `is_approved`, `approved_by`, `date_approved`, `is_private`, `cover_image`, `photos_count`, `is_public`) VALUES
-(16, 'Красота окружающей природы', 'Фотографии из коллекции сайта deviantart.com', '16-krasota-okruzhayuschei-prirody', 'фотографии, коллекции, сайта, deviantart.com', 'Фотографии из коллекции сайта deviantart.com', NULL, 'пример, фото', DATE_SUB(NOW(),INTERVAL 4 DAY), DATE_SUB(NOW(),INTERVAL 3 DAY), NULL, 1, 0, 1, NULL, NULL, NULL, NULL, NULL, 1, NULL, 1, 0, 0, 1, NULL, NULL, 0, '---\nbig: u1/004/4f11cd73.jpg\nnormal: u1/004/5b0ff517.jpg\nsmall: u1/004/5edb4681.jpg\n', 4, NULL);
+(16, 'Красота окружающей природы', 'Фотографии из коллекции сайта deviantart.com', '16-krasota-okruzhayuschei-prirody', 'фотографии, коллекции, сайта, deviantart.com', 'Фотографии из коллекции сайта deviantart.com', NULL, 'пример, фото', DATE_SUB(NOW(),INTERVAL 4 DAY), DATE_SUB(NOW(),INTERVAL 3 DAY), NULL, 1, 0, 1, NULL, NULL, NULL, NULL, NULL, 1, NULL, 1, 0, 0, 1, NULL, NULL, 0, NULL, 0, NULL);
 
 INSERT INTO `{#}con_albums_cats_bind` (`item_id`, `category_id`) VALUES
 (16, 1);
@@ -122,6 +122,7 @@ CREATE TABLE `{#}con_articles_cats` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `parent_id` int(11) unsigned DEFAULT NULL,
   `title` varchar(200) DEFAULT NULL,
+  `description` text NULL DEFAULT NULL,
   `slug` varchar(255) DEFAULT NULL,
   `slug_key` varchar(255) DEFAULT NULL,
   `seo_keys` varchar(256) DEFAULT NULL,
@@ -299,6 +300,7 @@ CREATE TABLE `{#}con_board_cats` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `parent_id` int(11) unsigned DEFAULT NULL,
   `title` varchar(200) DEFAULT NULL,
+  `description` text NULL DEFAULT NULL,
   `slug` varchar(255) DEFAULT NULL,
   `slug_key` varchar(255) DEFAULT NULL,
   `seo_keys` varchar(256) DEFAULT NULL,
@@ -598,6 +600,7 @@ CREATE TABLE `{#}con_news_cats` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `parent_id` int(11) unsigned DEFAULT NULL,
   `title` varchar(200) DEFAULT NULL,
+  `description` text NULL DEFAULT NULL,
   `slug` varchar(255) DEFAULT NULL,
   `slug_key` varchar(255) DEFAULT NULL,
   `seo_keys` varchar(256) DEFAULT NULL,
@@ -684,7 +687,7 @@ INSERT INTO `{#}con_news_fields` (`id`, `ctype_id`, `name`, `title`, `hint`, `or
 (3, 10, 'user', 'Автор', NULL, 5, NULL, 'user', 1, 1, 0, NULL, 1, 1, 1, NULL, '---\nlabel_in_list: none\nlabel_in_item: left\n', NULL, NULL),
 (4, 10, 'content', 'Текст новости', NULL, 4, NULL, 'html', NULL, 1, NULL, NULL, 1, NULL, NULL, NULL, '---\neditor: redactor\nis_html_filter: 1\nteaser_len:\nlabel_in_list: none\nlabel_in_item: none\nis_required: 1\nis_digits: null\nis_alphanumeric: null\nis_email: null\nis_unique: null\nprofile_value:\n', '---\n- 0\n', '---\n- 0\n'),
 (5, 10, 'teaser', 'Краткое описание новости', 'Выводится в списке новостей', 3, NULL, 'string', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '---\nmin_length: 0\nmax_length: 255\nlabel_in_list: none\nlabel_in_item: none\nis_required: 1\nis_digits: null\nis_alphanumeric: null\nis_email: null\nis_unique: null\nprofile_value:\n', '---\n- 0\n', '---\n- 0\n'),
-(6, 10, 'photo', 'Фотография', NULL, 2, NULL, 'image', 1, 1, NULL, NULL, NULL, NULL, NULL, NULL, '---\nsize_teaser: small\nsize_full: normal\nsizes:\n  - micro\n  - small\n  - normal\n  - big\nlabel_in_list: none\nlabel_in_item: none\nis_required: null\nis_digits: null\nis_alphanumeric: null\nis_email: null\nis_unique: null\nprofile_value:\n', '---\n- 0\n', '---\n- 0\n');
+(6, 10, 'photo', 'Фотография', NULL, 2, NULL, 'image', 1, 1, NULL, NULL, NULL, NULL, NULL, NULL, '---\nsize_teaser: small\nsize_full: normal\nsize_modal: big\nsizes:\n  - normal\n  - micro\n  - small\n  - big\nallow_import_link: null\nlabel_in_list: none\nlabel_in_item: none\nwrap_type: left\nwrap_width:\nis_required: null\nis_digits: null\nis_alphanumeric: null\nis_email: null\nis_unique: null\nprofile_value:\n', '---\n- 0\n', '---\n- 0\n');
 
 DROP TABLE IF EXISTS `{#}con_news_props`;
 CREATE TABLE `{#}con_news_props` (
@@ -780,6 +783,7 @@ CREATE TABLE `{#}con_posts_cats` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `parent_id` int(11) unsigned DEFAULT NULL,
   `title` varchar(200) DEFAULT NULL,
+  `description` text NULL DEFAULT NULL,
   `slug` varchar(255) DEFAULT NULL,
   `slug_key` varchar(255) DEFAULT NULL,
   `seo_keys` varchar(256) DEFAULT NULL,
@@ -1002,12 +1006,6 @@ INSERT INTO `{#}perms_users` (`rule_id`, `group_id`, `subject`, `value`) VALUES
 (3, 3, 'board', 'own'),
 (2, 3, 'board', 'own');
 
-INSERT INTO `{#}photos` (`id`, `album_id`, `user_id`, `date_pub`, `title`, `image`, `rating`, `comments`) VALUES
-(86, 16, 1, CURRENT_TIMESTAMP, 'Nature by A423', '---\nbig: u1/004/4f11cd73.jpg\nnormal: u1/004/5b0ff517.jpg\nsmall: u1/004/5edb4681.jpg\n', 0, 0),
-(87, 16, 1, CURRENT_TIMESTAMP, 'Nature by dingoou', '---\nbig: u1/004/70b77768.jpg\nnormal: u1/004/9568f6f9.jpg\nsmall: u1/004/2def2ff8.jpg\n', 0, 0),
-(88, 16, 1, CURRENT_TIMESTAMP, 'Nature by mimih', '---\nbig: u1/004/641fbd6c.jpg\nnormal: u1/004/a381f541.jpg\nsmall: u1/004/0032a402.jpg\n', 0, 0),
-(89, 16, 1, CURRENT_TIMESTAMP, 'Nature by PopiX', '---\nbig: u1/004/e75ad9ee.jpg\nnormal: u1/004/862f9e9d.jpg\nsmall: u1/004/554b8c90.jpg\n', 0, 0);
-
 INSERT INTO `{#}rss_feeds` (`id`, `ctype_id`, `ctype_name`, `title`, `description`, `image`, `mapping`, `limit`, `is_enabled`, `is_cache`, `cache_interval`, `date_cached`) VALUES
 (2, 5, 'articles', 'Статьи', NULL, NULL, '---\ntitle: title\ndescription: teaser\npubDate: date_pub\nimage:\nimage_size: normal\n', 15, 1, NULL, 60, NULL),
 (3, 6, 'posts', 'Посты', 'Лента пользовательских постов', NULL, '---\ntitle: title\ndescription: content\npubDate: date_pub\nimage: picture\nimage_size: normal\n', 15, 1, NULL, 60, NULL),
@@ -1050,7 +1048,7 @@ INSERT INTO `{#}users_statuses` (`id`, `user_id`, `date_pub`, `content`, `replie
 
 INSERT INTO `{#}wall_entries` (`id`, `date_pub`, `controller`, `profile_type`, `profile_id`, `user_id`, `parent_id`, `status_id`, `content`, `content_html`) VALUES
 (1, CURRENT_TIMESTAMP, 'users', 'user', 1, 1, 0, 1, 'We are all made of stars © Moby', 'We are all made of stars © Moby'),
-(2, CURRENT_TIMESTAMP, NULL, 'user', 1, 1, 1, NULL, 'Спасибо что заглянули в мой профиль!', 'Спасибо что заглянули в мой профиль!');
+(2, CURRENT_TIMESTAMP, 'users', 'user', 1, 1, 1, NULL, 'Спасибо что заглянули в мой профиль!', 'Спасибо что заглянули в мой профиль!');
 
 INSERT INTO `{#}widgets_bind` (`id`, `template`, `widget_id`, `title`, `links`, `class`, `class_title`, `class_wrap`, `is_title`, `is_enabled`, `is_tab_prev`, `groups_view`, `groups_hide`, `options`, `page_id`, `position`, `ordering`, `tpl_body`, `tpl_wrap`) VALUES
 (6, 'default', 8, 'Сейчас онлайн', NULL, NULL, NULL, NULL, 1, 1, NULL, '---\n- 0\n', NULL, '---\nis_avatars: 1\ngroups: null\n', 1, 'right-bottom', 1, NULL, NULL),
@@ -1068,23 +1066,23 @@ INSERT INTO `{#}widgets_bind` (`id`, `template`, `widget_id`, `title`, `links`, 
 (21, 'default', 13, 'Поиск', NULL, NULL, NULL, NULL, NULL, 1, NULL, '---\n- 0\n', NULL, '', 1, 'right-top', 1, NULL, NULL);
 
 INSERT INTO `{#}widgets_pages` (`id`, `controller`, `name`, `title_const`, `title_subject`, `title`, `url_mask`, `url_mask_not`) VALUES
-(143, 'content', 'pages.all', 'LANG_WP_CONTENT_ALL_PAGES', 'Страницы', NULL, 'pages\npages-*\npages/*', NULL),
-(144, 'content', 'pages.list', 'LANG_WP_CONTENT_LIST', 'Страницы', NULL, 'pages\npages-*\npages/*', 'pages/*.html\npages/add\npages/edit/*'),
-(145, 'content', 'pages.item', 'LANG_WP_CONTENT_ITEM', 'Страницы', NULL, 'pages/*.html', NULL),
-(146, 'content', 'pages.edit', 'LANG_WP_CONTENT_ITEM_EDIT', 'Страницы', NULL, 'pages/add\npages/edit/*', NULL),
-(147, 'content', 'articles.all', 'LANG_WP_CONTENT_ALL_PAGES', 'Статьи', NULL, 'articles\narticles-*\narticles/*', NULL),
-(148, 'content', 'articles.list', 'LANG_WP_CONTENT_LIST', 'Статьи', NULL, 'articles\narticles-*\narticles/*', 'articles/*.html\narticles/add\narticles/edit/*'),
-(149, 'content', 'articles.item', 'LANG_WP_CONTENT_ITEM', 'Статьи', NULL, 'articles/*.html', NULL),
-(150, 'content', 'articles.edit', 'LANG_WP_CONTENT_ITEM_EDIT', 'Статьи', NULL, 'articles/add\narticles/edit/*', NULL),
-(151, 'content', 'posts.all', 'LANG_WP_CONTENT_ALL_PAGES', 'Посты', NULL, 'posts\nposts-*\nposts/*', NULL),
-(152, 'content', 'posts.list', 'LANG_WP_CONTENT_LIST', 'Посты', NULL, 'posts\nposts-*\nposts/*', 'posts/*.html\nposts/add\nposts/edit/*'),
-(153, 'content', 'posts.item', 'LANG_WP_CONTENT_ITEM', 'Посты', NULL, 'posts/*.html', NULL),
-(154, 'content', 'posts.edit', 'LANG_WP_CONTENT_ITEM_EDIT', 'Посты', NULL, 'posts/add\nposts/edit/*', NULL),
-(159, 'content', 'board.all', 'LANG_WP_CONTENT_ALL_PAGES', 'Объявления', NULL, 'board\nboard-*\nboard/*', NULL),
-(160, 'content', 'board.list', 'LANG_WP_CONTENT_LIST', 'Объявления', NULL, 'board\nboard-*\nboard/*', 'board/*.html\nboard/add\nboard/edit/*'),
-(161, 'content', 'board.item', 'LANG_WP_CONTENT_ITEM', 'Объявления', NULL, 'board/*.html', NULL),
-(162, 'content', 'board.edit', 'LANG_WP_CONTENT_ITEM_EDIT', 'Объявления', NULL, 'board/add\nboard/edit/*', NULL),
-(163, 'content', 'news.all', 'LANG_WP_CONTENT_ALL_PAGES', 'Новости', NULL, 'news\nnews-*\nnews/*', NULL),
-(164, 'content', 'news.list', 'LANG_WP_CONTENT_LIST', 'Новости', NULL, 'news\nnews-*\nnews/*', 'news/*.html\nnews/add\nnews/edit/*'),
-(165, 'content', 'news.item', 'LANG_WP_CONTENT_ITEM', 'Новости', NULL, 'news/*.html', NULL),
-(166, 'content', 'news.edit', 'LANG_WP_CONTENT_ITEM_EDIT', 'Новости', NULL, 'news/add\nnews/edit/*', NULL);
+(143, 'content', 'pages.all', 'LANG_WP_CONTENT_ALL_PAGES', NULL, NULL, 'pages\npages-*\npages/*', NULL),
+(144, 'content', 'pages.list', 'LANG_WP_CONTENT_LIST', NULL, NULL, 'pages\npages-*\npages/*', 'pages/*.html\npages/add\npages/add/%\npages/addcat\npages/addcat/%\npages/editcat/%\npages/edit/*'),
+(145, 'content', 'pages.item', 'LANG_WP_CONTENT_ITEM', NULL, NULL, 'pages/*.html', NULL),
+(146, 'content', 'pages.edit', 'LANG_WP_CONTENT_ITEM_EDIT', NULL, NULL, 'pages/add\npages/edit/*', NULL),
+(147, 'content', 'articles.all', 'LANG_WP_CONTENT_ALL_PAGES', NULL, NULL, 'articles\narticles-*\narticles/*', NULL),
+(148, 'content', 'articles.list', 'LANG_WP_CONTENT_LIST', NULL, NULL, 'articles\narticles-*\narticles/*', 'articles/*.html\narticles/add\narticles/add/%\narticles/addcat\narticles/addcat/%\narticles/editcat/%\narticles/edit/*'),
+(149, 'content', 'articles.item', 'LANG_WP_CONTENT_ITEM', NULL, NULL, 'articles/*.html', NULL),
+(150, 'content', 'articles.edit', 'LANG_WP_CONTENT_ITEM_EDIT', NULL, NULL, 'articles/add\narticles/edit/*', NULL),
+(151, 'content', 'posts.all', 'LANG_WP_CONTENT_ALL_PAGES', NULL, NULL, 'posts\nposts-*\nposts/*', NULL),
+(152, 'content', 'posts.list', 'LANG_WP_CONTENT_LIST', NULL, NULL, 'posts\nposts-*\nposts/*', 'posts/*.html\nposts/add\nposts/add/%\nposts/addcat\nposts/addcat/%\nposts/editcat/%\nposts/edit/*'),
+(153, 'content', 'posts.item', 'LANG_WP_CONTENT_ITEM', NULL, NULL, 'posts/*.html', NULL),
+(154, 'content', 'posts.edit', 'LANG_WP_CONTENT_ITEM_EDIT', NULL, NULL, 'posts/add\nposts/edit/*', NULL),
+(159, 'content', 'board.all', 'LANG_WP_CONTENT_ALL_PAGES', NULL, NULL, 'board\nboard-*\nboard/*', NULL),
+(160, 'content', 'board.list', 'LANG_WP_CONTENT_LIST', NULL, NULL, 'board\nboard-*\nboard/*', 'board/*.html\nboard/add\nboard/add/%\nboard/addcat\nboard/addcat/%\nboard/editcat/%\nboard/edit/*'),
+(161, 'content', 'board.item', 'LANG_WP_CONTENT_ITEM', NULL, NULL, 'board/*.html', NULL),
+(162, 'content', 'board.edit', 'LANG_WP_CONTENT_ITEM_EDIT', NULL, NULL, 'board/add\nboard/edit/*', NULL),
+(163, 'content', 'news.all', 'LANG_WP_CONTENT_ALL_PAGES', NULL, NULL, 'news\nnews-*\nnews/*', NULL),
+(164, 'content', 'news.list', 'LANG_WP_CONTENT_LIST', NULL, NULL, 'news\nnews-*\nnews/*', 'news/*.html\nnews/add\nnews/add/%\nnews/addcat\nnews/addcat/%\nnews/editcat/%\nnews/edit/*'),
+(165, 'content', 'news.item', 'LANG_WP_CONTENT_ITEM', NULL, NULL, 'news/*.html', NULL),
+(166, 'content', 'news.edit', 'LANG_WP_CONTENT_ITEM_EDIT', NULL, NULL, 'news/add\nnews/edit/*', NULL);

@@ -18,14 +18,19 @@ function grid_presets($controller){
         'title' => array(
             'title' => LANG_IMAGES_PRESET,
             'href' => href_to($controller->root_url, 'presets_edit', array('{id}')),
+            'editable' => array(
+                'table' => 'images_presets'
+            )
         ),
         'name' => array(
             'title' => LANG_SYSTEM_NAME,
+            'width' => 200
         ),
         'width' => array(
             'title' => LANG_IMAGES_PRESET_SIZE,
+            'width' => 100,
 			'handler' => function($val, $row){
-				return $val . ' x ' . $row['height'];
+				return ($val ? $val : LANG_AUTO) . ' x ' . ($row['height'] ? $row['height'] : LANG_AUTO);
 			}
         ),
         'quality' => array(

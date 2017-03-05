@@ -3,6 +3,7 @@
 class users extends cmsFrontend {
 
     protected $useOptions = true;
+    public $useSeoOptions = true;
 
     public $tabs = array();
     public $tabs_controllers = array();
@@ -40,6 +41,9 @@ class users extends cmsFrontend {
                                         cmsUser::isAllowed('users', 'vote_karma') &&
                                         ($this->cms_user->id != $profile['id']) &&
                                         $this->model->isUserCanVoteKarma($this->cms_user->id, $profile['id'], $this->options['karma_time']);
+
+        // кешируем запись для получения ее в виджетах
+        cmsModel::cacheResult('current_profile', $profile);
 
         // Нет параметров после названия экшена (/users/id) - значит
         // это главная страница профиля, первым параметром добавляем
@@ -165,6 +169,13 @@ class users extends cmsFrontend {
             'controller' => $this->name,
             'action' => $profile['id'],
             'params' => array('edit', 'password'),
+        );
+
+        $menu[] = array(
+            'title'      => LANG_USERS_SESSIONS,
+            'controller' => $this->name,
+            'action'     => $profile['id'],
+            'params'     => array('edit', 'sessions')
         );
 
         return cmsEventsManager::hook('profile_edit_menu', $menu);

@@ -5,12 +5,16 @@ class cmsCore {
     private static $instance;
 
 	public $uri            = '';
+	public $uri_before_remap = '';
     public $uri_absolute   = '';
     public $uri_controller = '';
     public $uri_controller_before_remap = '';
     public $uri_action     = '';
     public $uri_params     = array();
     public $uri_query      = array();
+
+    private static $language = 'ru';
+    private static $language_href_prefix = '';
 
     public $controller = '';
 
@@ -33,6 +37,8 @@ class cmsCore {
 
         $this->request = new cmsRequest($_REQUEST);
 
+        self::detectLanguage();
+
     }
 
     public static function startTimer() {
@@ -41,6 +47,45 @@ class cmsCore {
 
     public static function getTime() {
         return microtime(true) - self::$start_time;
+    }
+
+//============================================================================//
+//============================================================================//
+
+    private static function detectLanguage() {
+
+        $config = cmsConfig::getInstance();
+
+        self::$language = $config->language;
+
+        if(!empty($_SERVER['REQUEST_URI']) && !empty($config->is_user_change_lang)){
+
+            $segments = explode('/', mb_substr($_SERVER['REQUEST_URI'], mb_strlen($config->root)));
+
+            // язык может быть только двухбуквенный, определяем его по первому сегменту
+            if (!empty($segments[0]) && preg_match('/^[a-z]{2}$/i', $segments[0])) {
+                if(is_dir($config->root_path.'system/languages/'.$segments[0].'/')){
+                    // язык по-умолчанию без префиксов, дубли нам не нужны
+                    if($segments[0] != $config->language){
+
+                        self::$language = self::$language_href_prefix = $segments[0]; unset($segments[0]);
+
+                        $_SERVER['REQUEST_URI'] = $config->root.implode('/', $segments);
+
+                    }
+                }
+            }
+
+        }
+
+    }
+
+    public static function getLanguageHrefPrefix() {
+        return self::$language_href_prefix;
+    }
+
+    public static function getLanguageName() {
+        return self::$language;
     }
 
 //============================================================================//
@@ -216,7 +261,7 @@ class cmsCore {
 
         $model_class = 'model' . string_to_camel($delimitter, $controller);
 
-        if (!class_exists($model_class)) {
+        if (!class_exists($model_class, false)) {
 
             $model_file = cmsConfig::get('root_path').'system/controllers/'.$controller.'/model.php';
 
@@ -258,7 +303,7 @@ class cmsCore {
 
         $ctrl_file = $config->root_path . 'system/controllers/'.$controller_name.'/frontend.php';
 
-        if (!class_exists($controller_name)) {
+        if (!class_exists($controller_name, false)) {
             include_once($ctrl_file);
         }
 
@@ -268,7 +313,7 @@ class cmsCore {
             $controller_class = $controller_name;
         } else {
             $controller_class = $controller_name . '_custom';
-            if (!class_exists($controller_class)){
+            if (!class_exists($controller_class, false)){
                 include_once($custom_file);
             }
         }
@@ -342,7 +387,9 @@ class cmsCore {
 
     }
 
-    public static function getWidgetOptionsForm($widget_name, $controller_name=false, $options=false){
+    public static function getWidgetOptionsForm($widget_name, $controller_name=false, $options=false, $template=false){
+
+        $template = $template ? $template : cmsConfig::get('template');
 
 		$widget_path = self::getWidgetPath($widget_name, $controller_name);
 
@@ -352,8 +399,7 @@ class cmsCore {
 
         $form_name = 'widget' . ($controller_name ? "_{$controller_name}_" : '_') . "{$widget_name}_options";
 
-        $form = cmsForm::getForm($form_file, $form_name, array($options));
-
+        $form = cmsForm::getForm($form_file, $form_name, array($options, $template));
         if (!$form) { $form = new cmsForm(); }
 
         $form->is_tabbed = true;
@@ -378,8 +424,8 @@ class cmsCore {
             $form->addField($design_fieldset_id, new fieldList('tpl_wrap', array(
                 'title' => LANG_WIDGET_WRAPPER_TPL,
 				'hint'  => LANG_WIDGET_WRAPPER_TPL_HINT,
-                'generator' => function($item){
-                    $current_tpls = cmsCore::getFilesList('templates/'.cmsConfig::get('template').'/widgets', '*.tpl.php');
+                'generator' => function($item) use ($template){
+                    $current_tpls = cmsCore::getFilesList('templates/'.$template.'/widgets', '*.tpl.php');
                     $default_tpls = cmsCore::getFilesList('templates/default/widgets', '*.tpl.php');
                     $tpls = array_unique(array_merge($current_tpls, $default_tpls));
                     $items = array();
@@ -395,9 +441,9 @@ class cmsCore {
             $form->addField($design_fieldset_id, new fieldList('tpl_body', array(
                 'title' => LANG_WIDGET_BODY_TPL,
 				'hint' => sprintf(LANG_WIDGET_BODY_TPL_HINT, $widget_path),
-                'generator' => function($item){
+                'generator' => function($item) use ($template){
                     $w_path = cmsCore::getWidgetPath($item['name'], $item['controller']);
-                    $current_tpls = cmsCore::getFilesList('templates/'.cmsConfig::get('template').'/'.$w_path, '*.tpl.php');
+                    $current_tpls = cmsCore::getFilesList('templates/'.$template.'/'.$w_path, '*.tpl.php');
                     $default_tpls = cmsCore::getFilesList('templates/default/'.$w_path, '*.tpl.php');
                     $tpls = array_unique(array_merge($current_tpls, $default_tpls));
                     $items = array();
@@ -458,6 +504,7 @@ class cmsCore {
             // Флаг объединения с предыдущим виджетом
             $form->addField($title_fieldset_id, new fieldCheckbox('is_tab_prev', array(
                 'title' => LANG_WIDGET_TAB_PREV,
+                'default' => false
             )));
 
             // Ссылки в заголовке
@@ -482,9 +529,7 @@ class cmsCore {
      */
     public static function loadLanguage($file=false){
 
-        $config = cmsConfig::getInstance();
-
-        $lang_dir = 'system/languages/'. $config->language;
+        $lang_dir = 'system/languages/'. self::$language;
 
         if (!$file){
 
@@ -509,11 +554,7 @@ class cmsCore {
      */
     public static function getLanguageTextFile($file){
 
-        $config = cmsConfig::getInstance();
-
-        if (!isset($config->language)){	$config->language = 'ru'; }
-
-        $lang_dir = $config->root_path . 'system/languages/'. $config->language;
+        $lang_dir = cmsConfig::get('root_path').'system/languages/'.self::$language;
 
         $lang_file = $lang_dir .'/' . $file . '.txt';
 
@@ -611,7 +652,7 @@ class cmsCore {
 
         }
 
-        $this->uri = $uri;
+        $this->uri = $this->uri_before_remap = $uri;
         $this->uri_absolute = $config->root . $uri;
 
         // разбиваем URL на сегменты
@@ -651,11 +692,10 @@ class cmsCore {
         if ($remap_to) {
             // в uri также меняем
             if($this->uri){
-                $original_uri = $this->uri;
                 $seg = explode('/', $this->uri);
                 $seg[0] = $remap_to;
                 $this->uri = implode('/', $seg);
-                $this->uri_absolute = str_replace($original_uri, $this->uri, $this->uri_absolute);
+                $this->uri_absolute = str_replace($this->uri_before_remap, $this->uri, $this->uri_absolute);
             }
             $this->uri_controller_before_remap = $this->uri_controller;
             $this->uri_controller = $remap_to;
@@ -711,6 +751,9 @@ class cmsCore {
 
         if (is_array($widgets_list)){
             foreach ($widgets_list as $widget){
+                if(!empty($widget['controller']) && !cmsController::enabled($widget['controller'])){
+                    continue;
+                }
                 $this->runWidget($widget);
             }
         }
@@ -785,6 +828,8 @@ class cmsCore {
 
         $matched_pages = array(0);
 
+        $_full_uri = $this->uri.($this->uri_query ? '?'.http_build_query($this->uri_query) : '');
+
         //
         // Перебираем все точки привязок и проверяем совпадение
         // маски URL с текущим URL
@@ -806,7 +851,7 @@ class cmsCore {
                 foreach($page['url_mask_not'] as $mask){
                     $regular = string_mask_to_regular($mask);
                     $regular = "/^{$regular}$/iu";
-                    $is_stop_match = $is_stop_match || preg_match($regular, $this->uri);
+                    $is_stop_match = $is_stop_match || preg_match($regular, $_full_uri);
                 }
             }
 

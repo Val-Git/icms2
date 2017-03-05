@@ -2,7 +2,11 @@
 
 class cmsBackend extends cmsController {
 
-    function __construct($request){
+    private $h1 = '';
+
+    public $maintained_ctype = false;
+
+    public function __construct($request){
 
         $this->name = str_replace('backend', '', strtolower(get_called_class()));
 
@@ -12,10 +16,26 @@ class cmsBackend extends cmsController {
 
     }
 
+    public function setH1($title) {
+
+        if (is_array($title)){ $title = implode(' -> ', $title); }
+
+        $this->h1 = ' -> '.$title;
+
+    }
+
+    public function getH1() {
+        return $this->h1;
+    }
+
 //============================================================================//
 //============================================================================//
 
     public function getBackendMenu(){
+        return array();
+    }
+
+    public function getOptionsToolbar(){
         return array();
     }
 
@@ -62,6 +82,35 @@ class cmsBackend extends cmsController {
 //=========                  ОПЦИИ КОМПОНЕНТА                        =========//
 //============================================================================//
 
+    public function addControllerSeoOptions($form) {
+
+        if($this->useSeoOptions){
+            $form->addFieldset(LANG_ROOT_SEO, 'seo_basic', array(
+                'childs' => array(
+                    new fieldString('seo_keys', array(
+                        'title' => LANG_SEO_KEYS,
+                        'hint' => LANG_SEO_KEYS_HINT,
+                        'options'=>array(
+                            'max_length'=> 256,
+                            'show_symbol_count'=>true
+                        )
+                    )),
+                    new fieldText('seo_desc', array(
+                        'title' => LANG_SEO_DESC,
+                        'hint' => LANG_SEO_DESC_HINT,
+                        'options'=>array(
+                            'max_length'=> 256,
+                            'show_symbol_count'=>true
+                        )
+                    ))
+                )
+            ));
+        }
+
+        return $form;
+
+    }
+
     public function actionOptions(){
 
         if (empty($this->useDefaultOptionsAction)){ cmsCore::error404(); }
@@ -69,14 +118,14 @@ class cmsBackend extends cmsController {
         $form = $this->getForm('options');
         if (!$form) { cmsCore::error404(); }
 
-        $form = cmsEventsManager::hook("form_options_{$this->name}", $form);
+        $form = $this->addControllerSeoOptions($form);
 
         $options = cmsController::loadOptions($this->name);
 
         if ($this->request->has('submit')){
 
-            $options = $form->parse($this->request, true);
-            $errors = $form->validate($this, $options);
+            $options = array_merge( $options, $form->parse($this->request, true) );
+            $errors  = $form->validate($this, $options);
 
             if (!$errors){
 
@@ -99,6 +148,7 @@ class cmsBackend extends cmsController {
         }
 
         $template_params = array(
+            'toolbar' => $this->getOptionsToolbar(),
             'options' => $options,
             'form'    => $form,
             'errors'  => isset($errors) ? $errors : false
@@ -130,8 +180,15 @@ class cmsBackend extends cmsController {
         $rules  = cmsPermissions::getRulesList($this->name);
         $values = cmsPermissions::getPermissions($subject);
 
-        $users_model = cmsCore::getModel('users');
-        $groups = $users_model->getGroups(false);
+        // добавляем правила доступа от типа контента, если контроллер на его основе
+		$ctype = cmsCore::getModel('content')->getContentTypeByName($this->name);
+        if ($ctype) {
+            $rules = array_merge(cmsPermissions::getRulesList('content'), $rules);
+        }
+
+        list($rules, $values) = cmsEventsManager::hook("controller_{$this->name}_perms", array($rules, $values));
+
+        $groups = cmsCore::getModel('users')->getGroups(false);
 
         $template_params = array(
             'rules'   => $rules,
@@ -160,11 +217,17 @@ class cmsBackend extends cmsController {
         if (empty($this->useDefaultPermissionsAction)){ cmsCore::error404(); }
 
         $values = $this->request->get('value', array());
+        $rules  = cmsPermissions::getRulesList($this->name);
 
-        $rules = cmsPermissions::getRulesList($this->name);
+        // добавляем правила доступа от типа контента, если контроллер на его основе
+		$ctype = cmsCore::getModel('content')->getContentTypeByName($this->name);
+        if ($ctype) {
+            $rules = array_merge(cmsPermissions::getRulesList('content'), $rules);
+        }
 
-        $users_model = cmsCore::getModel('users');
-        $groups = $users_model->getGroups(false);
+        list($rules, $values) = cmsEventsManager::hook("controller_{$this->name}_perms", array($rules, $values));
+
+        $groups = cmsCore::getModel('users')->getGroups(false);
 
         // перебираем правила
         foreach($rules as $rule){
@@ -184,6 +247,8 @@ class cmsBackend extends cmsController {
             }
 
         }
+
+        cmsUser::addSessionMessage(LANG_CP_PERMISSIONS_SUCCESS, 'success');
 
         cmsPermissions::savePermissions($subject, $values);
 

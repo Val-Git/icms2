@@ -1,7 +1,15 @@
 <?php
 class widgetCommentsList extends cmsWidget {
 
+    public $is_cacheable = false;
+
     public function run(){
+
+        $controller_options = cmsController::loadOptions('comments');
+
+        if(!empty($controller_options['disable_icms_comments'])){
+            return false;
+        }
 
         $show_avatars = $this->getOption('show_avatars', true);
         $show_text    = $this->getOption('show_text', false);

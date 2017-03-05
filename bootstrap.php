@@ -32,14 +32,6 @@
         die();
     }
 
-    // Загружаем локализацию
-    cmsCore::loadLanguage();
-
-    // устанавливаем локаль языка
-    if(function_exists('lang_setlocale')){
-        lang_setlocale();
-    }
-
     // Устанавливаем часовую зону
     date_default_timezone_set( $config->time_zone );
 
@@ -48,13 +40,17 @@
 	cmsCore::loadLib('strings.helper');
 	cmsCore::loadLib('files.helper');
     cmsCore::loadLib('spyc.class');
-    // подключаем хелпер шаблона, если он есть
-    if(!cmsCore::includeFile('templates/'.$config->template.'/assets/helper.php')){
-        cmsCore::loadLib('template.helper');
-    }
 
     // Инициализируем ядро
     $core = cmsCore::getInstance();
+
+    // Загружаем локализацию
+    cmsCore::loadLanguage();
+
+    // устанавливаем локаль языка
+    if(function_exists('lang_setlocale')){
+        lang_setlocale();
+    }
 
     // Подключаем базу
     $core->connectDB();

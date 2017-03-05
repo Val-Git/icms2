@@ -54,7 +54,7 @@ $(document).ready(function(){
 
             var tabs = $(this);
 
-            var dropdown = $("<select>").appendTo(tabs);
+            var dropdown = $("<select>").prependTo(tabs);
             $("ul > li > a", tabs).each(function() {
                 var el = $(this);
                 var attr = {
@@ -75,11 +75,37 @@ $(document).ready(function(){
 
     }
 
+	$('.messages.ajax-modal a').on('click', function(){
+        $('#popup-manager').addClass('nyroModalMessage');
+	});
+
 });
 
 icms.forms = (function ($) {
 
-    //====================================================================//
+    this.submitted = false;
+    this.form_changed = false;
+
+    this.initUnsaveNotice = function(){
+
+        $(document).on('change', '.form-tabs input, .form-tabs select, .form-tabs textarea', function (e) {
+            icms.forms.form_changed = true;
+        });
+        $(document).on('submit', 'form', function () {
+            icms.forms.submitted = true;
+        });
+        $(window).on('beforeunload', function (e) {
+            if (icms.forms.form_changed && !icms.forms.submitted) {
+                var e = e || window.event;
+                var msg = LANG_SUBMIT_NOT_SAVE;
+                if (e) {
+                    e.returnValue = msg;
+                }
+                return msg;
+            }
+        });
+
+    };
 
 	this.toJSON = function(form) {
         var o = {};
@@ -97,9 +123,8 @@ icms.forms = (function ($) {
         return o;
 	};
 
-    //====================================================================//
-
     this.submit = function(){
+        icms.forms.submitted = true;
         $('.button-submit').trigger('click');
     };
 
@@ -135,11 +160,19 @@ icms.forms = (function ($) {
 
     this.submitAjax = function(form){
 
+        icms.forms.submitted = true;
+
         var form_data = this.toJSON($(form));
 
         var url = $(form).attr('action');
 
+        var submit_btn = $(form).find('.button-submit');
+
+        $(submit_btn).prop('disabled', true);
+
         $.post(url, form_data, function(result){
+
+            $(submit_btn).prop('disabled', false);
 
             if (result.errors == false){
                 if ("callback" in result){
@@ -157,11 +190,14 @@ icms.forms = (function ($) {
                     var id = field_id.replace(':', '_');
                     $('#f_'+id, form).addClass('field_error');
                     $('#f_'+id, form).prepend('<div class="error_text">' + result.errors[field_id] + '</div>');
+                    $(form).find('ul.tabbed > li > a[href = "#'+$('#f_'+id, form).parents('.tab').attr('id')+'"]').trigger('click');
                 }
 
                 icms.events.run('icms_forms_submitajax', result);
 
                 icms.modal.resize();
+
+                icms.forms.submitted = false;
 
                 return;
 
@@ -173,12 +209,19 @@ icms.forms = (function ($) {
 
     };
 
-    this.initSymbolCount = function (field_id, max){
+    this.initSymbolCount = function (field_id, max, min){
         $('#f_'+field_id).append('<div class="symbols_count"><span class="symbols_num"></span><span class="symbols_spell"></span></div>');
         var symbols_count = $('#f_'+field_id+' > .symbols_count');
         var symbols_num   = $('.symbols_num', symbols_count);
         var symbols_spell = $('.symbols_spell', symbols_count);
-        var type = 'total';
+        if(max){
+            var type = 'left';
+        } else {
+            var type = 'total';
+        }
+        if(min){
+            type = 'total';
+        }
         var field_id_el = $('#'+field_id);
 
         $(symbols_num).on('click', function (){
@@ -192,26 +235,31 @@ icms.forms = (function ($) {
             }
         });
         var render_symbols_count = function (){
-            num = +$(field_id_el).val().length;
+            var num = +$(field_id_el).val().length;
+            if(!num){
+                $(symbols_num).html(''); $(symbols_count).hide(); return;
+            }
+            if(min){ if(num < min){
+                    $(symbols_num).addClass('overflowing_min');
+                } else {
+                    $(symbols_num).removeClass('overflowing_min');
+            }}
+            if(max && num > max){
+                $(symbols_num).addClass('overflowing');
+            } else {
+                $(symbols_num).removeClass('overflowing');
+            }
             if(type === 'total'){
-                if(!num){
-                    $(symbols_num).html(''); $(symbols_count).hide(); return;
-                }
                 $(symbols_count).fadeIn();
                 $(symbols_num).html(num);
                 $(symbols_spell).html(spellcount(num, LANG_CH1, LANG_CH2, LANG_CH10));
-                if(max && num > max){
-                    $(symbols_num).addClass('overflowing');
-                } else {
-                    $(symbols_num).removeClass('overflowing');
-                }
             } else {
                 $(symbols_count).fadeIn();
                 if(num > max){
                     num = max;
                     $(field_id_el).val($(field_id_el).val().substr(0, max));
                 }
-                $(symbols_num).html((max - num)).removeClass('overflowing');
+                $(symbols_num).html((max - num));
                 $(symbols_spell).html(spellcount(num, LANG_CH1, LANG_CH2, LANG_CH10)+' '+LANG_ISLEFT);
             }
         };
@@ -239,7 +287,7 @@ icms.events = (function ($) {
 
     this.run = function(name, params){
         params = params || {};
-        for(event_name in this.listeners[name]) {
+        for(var event_name in this.listeners[name]) {
             if(this.listeners[name].hasOwnProperty(event_name)){
                 if (typeof(this.listeners[name][event_name]) == 'function') {
                     this.listeners[name][event_name](params);
@@ -252,7 +300,11 @@ icms.events = (function ($) {
 	return this;
 
 }).call(icms.events || {},jQuery);
-
+$.expr[':'].Contains = $.expr.createPseudo(function(arg) {
+    return function( elem ) {
+        return $(elem).text().toUpperCase().indexOf(arg.toUpperCase()) >= 0;
+    };
+});
 function toggleFilter(){
     var filter = $('.filter-panel');
     $('.filter-link', filter).toggle('fast');
@@ -286,5 +338,25 @@ function renderHtmlAvatar(wrap){
                 'font-size': Math.round((h*0.625))+'px'
             });
         });
+    });
+}
+function initTabs(selector){
+    $(selector+' .tab').hide();
+    $(selector+' .tab').eq(0).show();
+    $(selector+' ul.tabbed > li').eq(0).addClass('active');
+    $(selector+' ul.tabbed > li > a').click(function(){
+        $(selector+' li').removeClass('active');
+        $(this).parent('li').addClass('active');
+        $(selector+' .tab').hide();
+        $(selector+' '+$(this).attr('href')).show();
+        return false;
+    });
+    $(selector+' .field').each(function(indx, element){
+        if($(element).hasClass('field_error')){
+            $(selector+' ul.tabbed > li > a[href = "#'+$(element).parents('.tab').attr('id')+'"]').trigger('click');
+        }
+    });
+    $('> select', selector).change(function() {
+        $(selector+' ul.tabbed > li > a[href = "'+$(this).find("option:selected").val()+'"]').trigger('click');
     });
 }

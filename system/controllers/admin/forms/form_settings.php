@@ -186,6 +186,10 @@ class formAdminSettings extends cmsForm {
                         }
                     )),
 
+                    new fieldCheckbox('is_user_change_lang', array(
+                        'title' => LANG_CP_SETTINGS_USER_CHANGE_LANG
+                    )),
+
                     new fieldList('default_editor', array(
                         'title' => LANG_CP_SETTINGS_EDITOR,
                         'default' => 'redactor',
@@ -321,6 +325,7 @@ class formAdminSettings extends cmsForm {
 
                     new fieldList('cache_method', array(
                         'title' => LANG_CP_SETTINGS_CACHE_METHOD,
+                        'hint'  => !cmsConfig::get('cache_enabled') ? '' : sprintf(LANG_CP_SETTINGS_CACHE_CLEAN_MERGED, href_to('admin', 'cache_delete', cmsConfig::get('cache_method'))),
                         'items' => array(
                             'files' => 'Files',
                             'memory' => 'Memcached' . (extension_loaded('memcache') ? '' : ' ('.LANG_CP_SETTINGS_CACHE_METHOD_NO.')'),
@@ -361,7 +366,7 @@ class formAdminSettings extends cmsForm {
 
                     new fieldText('allow_ips', array(
                         'title' => LANG_CP_SETTINGS_ALLOW_IPS,
-                        'hint'  => LANG_CP_SETTINGS_ALLOW_IPS_HINT
+                        'hint'  => sprintf(LANG_CP_SETTINGS_ALLOW_IPS_HINT, cmsUser::getIp())
                     ))
 
                 )

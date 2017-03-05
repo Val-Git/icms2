@@ -44,27 +44,51 @@ class cmsConfig {
 //============================================================================//
 //============================================================================//
 
-	public function __construct($cfg_file='config.php'){
+	public function __construct($cfg_file = 'config.php'){
 
-        $this->data = $this->load($cfg_file);
-
-        if(!$this->data){
-            return;
+        if($this->setData($cfg_file)){
+            $this->ready = true;
         }
 
+	}
+
+//============================================================================//
+//============================================================================//
+
+    public function isReady(){
+        return $this->ready;
+    }
+
+    public function set($key, $value){
+        $this->data[$key] = $value;
+        $this->dynamic[] = $key;
+    }
+
+    public function getAll(){
+        return $this->data;
+    }
+
+    public function __get($name) {
+		if (!isset($this->data[$name])){ return false; }
+        return $this->data[$name];
+    }
+
+	public function __isset($name) {
+		return isset($this->data[$name]);
+	}
+
+//============================================================================//
+//============================================================================//
+
+    public function setData($cfg_file = 'config.php') {
+
+        $this->data = $this->load($cfg_file);
+        if(!$this->data){ return false; }
+
         $this->set('cfg_time_zone', $this->data['time_zone']);
-        $this->set('cfg_language', $this->data['language']);
 
         if (isset($_SESSION['user']['time_zone'])){
             $this->data['time_zone'] = $_SESSION['user']['time_zone'];
-        }
-
-        if (isset($_SESSION['language'])){
-            $this->data['language'] = $_SESSION['language'];
-        }
-
-        if (isset($_SESSION['user']['language'])){
-            $this->data['language'] = $_SESSION['user']['language'];
         }
 
         if(empty($this->data['detect_ip_key']) || !isset($_SERVER[$this->data['detect_ip_key']])){
@@ -99,37 +123,9 @@ class cmsConfig {
 
         $this->set('protocol', $protocol);
 
-        $this->ready = true;
+        return true;
 
-	}
-
-//============================================================================//
-//============================================================================//
-
-    public function isReady(){
-        return $this->ready;
     }
-
-    public function set($key, $value){
-        $this->data[$key] = $value;
-        $this->dynamic[] = $key;
-    }
-
-    public function getAll(){
-        return $this->data;
-    }
-
-    public function __get($name) {
-		if (!isset($this->data[$name])){ return false; }
-        return $this->data[$name];
-    }
-
-	public function __isset($name) {
-		return isset($this->data[$name]);
-	}
-
-//============================================================================//
-//============================================================================//
 
     public function updateTimezone(){
 
@@ -150,7 +146,7 @@ class cmsConfig {
 
         $cfg_file = PATH . '/system/config/' . $cfg_file;
 
-        if(!file_exists($cfg_file)){
+        if(!is_readable($cfg_file)){
             return false;
         }
 
@@ -167,7 +163,7 @@ class cmsConfig {
 
             if (in_array($key, $this->dynamic)){ continue; }
 
-            $value = "'{$value}'";
+            $value = var_export($value, true);
 
             $tabs = 7 - ceil((mb_strlen($key)+3)/4);
 
@@ -181,7 +177,14 @@ class cmsConfig {
 
         $file = self::get('root_path').'system/config/' . $cfg_file;
 
-        return @file_put_contents($file, $dump);
+        $success = false;
+
+        if(is_writable($file)){
+            $success = file_put_contents($file, $dump);
+            if (function_exists('opcache_invalidate')) { @opcache_invalidate($file, true); }
+        }
+
+        return $success;
 
     }
 

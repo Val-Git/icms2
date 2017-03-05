@@ -14,6 +14,19 @@ class cmsController {
     public $root_path;
 
     /**
+     * Флаг, что контроллер должен работать только после
+     * регистрации в БД
+     * @var boolean
+     */
+    public $mb_installed = false;
+
+    /**
+     * Флаг наличия SEO параметров для index экшена
+     * @var boolean
+     */
+    public $useSeoOptions = false;
+
+    /**
      * Флаг блокировки прямого вызова экшена
      * полезно если название экшена переопределяется
      * а вызов экшена напрямую нужно запретить
@@ -139,6 +152,10 @@ class cmsController {
         return $this->isControllerEnabled($this->name);
     }
 
+    public function isControllerInstalled($name) {
+        return isset(self::$controllers[$name]);
+    }
+
     public function isControllerEnabled($name) {
 
         // проверяем только те, которые зарегистрированы в базе
@@ -221,6 +238,13 @@ class cmsController {
 
         $this->cms_template->setContext($this);
 
+        if($this->useSeoOptions && $action_name == 'index'){
+
+            if (!empty($this->options['seo_keys'])){ $this->cms_template->setPageKeywords($this->options['seo_keys']); }
+            if (!empty($this->options['seo_desc'])){ $this->cms_template->setPageDescription($this->options['seo_desc']); }
+
+        }
+
         return true;
 
     }
@@ -276,7 +300,7 @@ class cmsController {
 
         $action_file = $this->root_path . 'actions/' . $action_name.'.php';
 
-        if (file_exists($action_file)){
+        if (is_readable($action_file)){
             return true;
         }
 
@@ -302,7 +326,7 @@ class cmsController {
         // проверяем наличие экшена его в отдельном файле
         $action_file = $this->root_path . 'actions/' . $action_name.'.php';
 
-        if(file_exists($action_file)){
+        if(is_readable($action_file)){
 
             // вызываем экшен из отдельного файла
             $result = $this->runExternalAction($action_name, $this->current_params);
@@ -406,7 +430,7 @@ class cmsController {
             // если метода хука нет, проверяем наличие его в отдельном файле
             $hook_file = $this->root_path . 'hooks/' . $event_name . '.php';
 
-            if (file_exists($hook_file)){
+            if (is_readable($hook_file)){
 
                 // вызываем хук из отдельного файла
                 $result = $this->runExternalHook($event_name, $params);
@@ -437,7 +461,7 @@ class cmsController {
 
         $class_name = 'on' . string_to_camel('_', $this->name) . string_to_camel('_', $event_name);
 
-        if (!class_exists($class_name)){
+        if (!class_exists($class_name, false)){
 
             $hook_file = $this->root_path . 'hooks/' . $event_name . '.php';
 
@@ -463,9 +487,13 @@ class cmsController {
     public function getForm($form_name, $params=false, $path_prefix=''){
 
         $form_file = $this->root_path . $path_prefix . 'forms/form_' . $form_name . '.php';
-        $form_name = $this->name . $form_name;
+        $_form_name = $this->name . $form_name;
 
-        return cmsForm::getForm($form_file, $form_name, $params);
+        $form = cmsForm::getForm($form_file, $_form_name, $params);
+
+        list($form, $params) = cmsEventsManager::hook('form_'.$this->name.'_'.$form_name, array($form, $params));
+
+        return $form;
 
     }
 
@@ -495,7 +523,7 @@ class cmsController {
 
         $grid_file = $this->root_path . 'grids/grid_' . $grid_name . '.php';
 
-        if (!file_exists($grid_file)){ return false; }
+        if (!is_readable($grid_file)){ return false; }
 
         include($grid_file);
 
@@ -550,7 +578,7 @@ class cmsController {
 
         $file = $this->root_path . 'routes.php';
 
-        if (!file_exists($file)){ return array(); }
+        if (!is_readable($file)){ return array(); }
 
         include_once($file);
 
@@ -687,7 +715,9 @@ class cmsController {
      */
     public function redirectTo($controller, $action='', $params=array(), $query=array()){
 
-        $location = $this->cms_config->root . $controller . '/' . $action;
+        $href_lang = cmsCore::getLanguageHrefPrefix();
+
+        $location = $this->cms_config->root .($href_lang ? $href_lang.'/' : ''). $controller . '/' . $action;
 
         if ($params){ $location .= '/' . implode('/', $params); }
         if ($query){ $location .= '?' . http_build_query($query); }

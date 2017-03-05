@@ -75,10 +75,13 @@ class modelActivity extends cmsModel{
 
         cmsCache::getInstance()->clean('activity.entries');
 
-        return $this->
-                    filterEqual('type_id', $type_id)->
-                    filterEqual('subject_id', $subject_id)->
-                    deleteFiltered('activity');
+        if(is_array($subject_id)){
+            $this->filterIn('subject_id', $subject_id);
+        } else {
+            $this->filterEqual('subject_id', $subject_id);
+        }
+
+        return $this->filterEqual('type_id', $type_id)->deleteFiltered('activity');
 
     }
 
@@ -132,15 +135,18 @@ class modelActivity extends cmsModel{
 
         $this->useCache('activity.entries');
 
-        return $this->get('activity', function($item, $model){
+        $config = cmsConfig::getInstance();
+
+        return $this->get('activity', function($item, $model) use ($config) {
 
             $item['user'] = array(
-                'id' => $item['user_id'],
+                'id'       => $item['user_id'],
                 'nickname' => $item['user_nickname'],
-                'avatar' => $item['user_avatar']
+                'avatar'   => $item['user_avatar']
             );
 
             if (!empty($item['subject_url'])){
+                $item['subject_url'] = rel_to_href($item['subject_url']);
                 $max_title_len = 50;
                 $item['subject_title'] = mb_strlen($item['subject_title'])>$max_title_len ? mb_substr($item['subject_title'], 0, $max_title_len).'...' : $item['subject_title'];
                 $link = '<a href="'.$item['subject_url'].'">'. $item['subject_title'].'</a>';
@@ -148,22 +154,30 @@ class modelActivity extends cmsModel{
                 $link = $item['subject_title'];
             }
 
+            if (!empty($item['reply_url'])){
+                $item['reply_url'] = rel_to_href($item['reply_url']);
+            }
+
             $item['images'] = cmsModel::yamlToArray($item['images']);
 
 			if ($item['images']){
 
-				$config = cmsConfig::getInstance();
 				$images_exist = array();
 
-				foreach($item['images'] as $idx=>$image){
-					if (mb_substr($image['src'], 0, 7)!='http://') {
+				foreach($item['images'] as $key => $image){
+					if (strpos($image['src'], 'http') !== 0) {
 						if (!file_exists($config->upload_path . '/' . $image['src'])){
 							continue;
 						}
 						$image['src'] = $config->upload_host . '/' . $image['src'];
 					}
+                    $image['url'] = rel_to_href($image['url']);
 					$images_exist[] = $image;
 				}
+
+                if(!$images_exist){
+                    $model->deleteEntryById($item['id']);
+                }
 
 				$item['images'] = $images_exist;
 

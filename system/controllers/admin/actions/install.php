@@ -57,10 +57,7 @@ class actionAdminInstall extends cmsAction {
 
             $package_v = $manifest['version']['major'].'.'.$manifest['version']['minor'].'.'.$manifest['version']['build'];
 
-            $upd = (int)str_pad(str_replace('.', '', $package_v), 6, '0');
-            $inst = (int)str_pad(str_replace('.', '', $manifest['package']['installed_version']), 6, '0');
-
-            if($upd < $inst){
+            if(version_compare($package_v, $manifest['package']['installed_version']) == -1){
 
                 files_clear_directory(cmsConfig::get('upload_path') . $this->installer_upload_path);
 
@@ -70,7 +67,7 @@ class actionAdminInstall extends cmsAction {
 
             }
 
-            if($upd == $inst){
+            if(version_compare($package_v, $manifest['package']['installed_version']) == 0){
 
                 files_clear_directory(cmsConfig::get('upload_path') . $this->installer_upload_path);
 
@@ -82,7 +79,7 @@ class actionAdminInstall extends cmsAction {
 
         }
 
-        return cmsTemplate::getInstance()->render('install_package_info', array(
+        return $this->cms_template->render('install_package_info', array(
             'manifest' => $manifest
         ));
 
@@ -92,7 +89,7 @@ class actionAdminInstall extends cmsAction {
 
         $errors = $this->checkErrors();
 
-        return cmsTemplate::getInstance()->render('install_upload', array(
+        return $this->cms_template->render('install_upload', array(
             'errors' => $errors,
         ));
 
@@ -108,7 +105,7 @@ class actionAdminInstall extends cmsAction {
             $errors[] = array(
                 'text' => sprintf(LANG_CP_INSTALL_NOT_WRITABLE, $config->upload_root . $this->installer_upload_path),
                 'hint' => LANG_CP_INSTALL_NOT_WRITABLE_HINT,
-                'fix' => LANG_CP_INSTALL_NOT_WRITABLE_FIX,
+                'fix'  => LANG_CP_INSTALL_NOT_WRITABLE_FIX,
                 'workaround' => sprintf(LANG_CP_INSTALL_NOT_WRITABLE_WA, $config->upload_root . $this->installer_upload_path)
             );
         }
@@ -117,7 +114,7 @@ class actionAdminInstall extends cmsAction {
             $errors[] = array(
                 'text' => LANG_CP_INSTALL_NOT_ZIP,
                 'hint' => LANG_CP_INSTALL_NOT_ZIP_HINT,
-                'fix' => LANG_CP_INSTALL_NOT_ZIP_FIX,
+                'fix'  => LANG_CP_INSTALL_NOT_ZIP_FIX,
                 'workaround' => sprintf(LANG_CP_INSTALL_NOT_ZIP_WA, $config->upload_root . $this->installer_upload_path),
             );
         }
@@ -132,18 +129,30 @@ class actionAdminInstall extends cmsAction {
 
         if (isset($manifest['depends']['core'])){
 
-            $need = (int)str_pad(str_replace('.', '', $manifest['depends']['core']), 6, '0');
-            $has = (int)str_pad(str_replace('.', '', cmsCore::getVersion()), 6, '0');
-
-            $results['core'] = ($need <= $has) ? true : false;
+            $results['core'] = (version_compare(cmsCore::getVersion(), $manifest['depends']['core']) >= 0) ? true : false;
 
         }
         if (isset($manifest['depends']['package']) && isset($manifest['package']['installed_version'])){
 
-            $need = (int)str_pad(str_replace('.', '', $manifest['depends']['package']), 6, '0');
-            $has = (int)str_pad(str_replace('.', '', (string)$manifest['package']['installed_version']), 6, '0');
+            $results['package'] = (version_compare((string)$manifest['package']['installed_version'], $manifest['depends']['package']) >= 0) ? true : false;
 
-            $results['package'] = ($need <= $has) ? true : false;
+        }
+        if (isset($manifest['depends']['dependent_type']) && isset($manifest['depends']['dependent_name'])){
+
+            $installed_version = call_user_func(array($this, $manifest['depends']['dependent_type'].'Installed'), array(
+                'name'       => $manifest['depends']['dependent_name'],
+                'controller' => (isset($manifest['depends']['dependent_controller']) ? $manifest['depends']['dependent_controller'] : null)
+            ));
+
+            $valid = $installed_version !== false;
+
+            if($valid && isset($manifest['depends']['dependent_version'])){
+
+                $results['dependent_version'] = (version_compare((string)$installed_version, $manifest['depends']['dependent_version']) >= 0) ? true : false;
+
+            }
+
+            $results['dependent_type'] = $valid;
 
         }
 

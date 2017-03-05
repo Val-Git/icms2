@@ -2,41 +2,55 @@
 
 <?php if ($fields['title']['is_in_item']){ ?>
     <h1>
-        <?php if ($item['parent_id']){ ?>
-            <div class="parent_title">
-                <a href="<?php echo href_to($item['parent_url']); ?>"><?php html($item['parent_title']); ?></a> &rarr;
-            </div>
-        <?php } ?>
         <?php html($item['title']); ?>
         <?php if ($item['is_private']) { ?>
             <span class="is_private" title="<?php html(LANG_PRIVACY_PRIVATE); ?>"></span>
         <?php } ?>
     </h1>
+    <?php if ($item['parent_id']){ ?>
+        <h2 class="parent_title item_<?php echo $item['parent_type']; ?>_title">
+            <a href="<?php echo rel_to_href($item['parent_url']); ?>"><?php html($item['parent_title']); ?></a>
+        </h2>
+    <?php } ?>
     <?php unset($fields['title']); ?>
 <?php } ?>
 
 <div class="content_item <?php echo $ctype['name']; ?>_item">
 
-    <?php foreach($fields as $name=>$field){ ?>
+    <?php if (!empty($fields)) { ?>
 
-        <?php if (!$field['is_in_item'] || $field['is_system']) { continue; } ?>
-        <?php if ((empty($item[$field['name']]) || empty($field['html'])) && $item[$field['name']] !== '0') { continue; } ?>
-        <?php if ($field['groups_read'] && !$user->isInGroups($field['groups_read'])) { continue; } ?>
+        <?php $fields_fieldsets = cmsForm::mapFieldsToFieldsets($fields, function($field, $user) use ($item) {
+            if (!$field['is_in_item'] || $field['is_system']) { return false; }
+            if ((empty($item[$field['name']]) || empty($field['html'])) && $item[$field['name']] !== '0') { return false; }
+            if ($field['groups_read'] && !$user->isInGroups($field['groups_read'])) { return false; }
+            return true;
+        } ); ?>
 
-        <?php
-            if (!isset($field['options']['label_in_item'])) {
-                $label_pos = 'none';
-            } else {
-                $label_pos = $field['options']['label_in_item'];
-            }
-        ?>
+        <?php foreach ($fields_fieldsets as $fieldset) { ?>
 
-        <div class="field ft_<?php echo $field['type']; ?> f_<?php echo $field['name']; ?>">
-            <?php if ($label_pos != 'none'){ ?>
-                <div class="title_<?php echo $label_pos; ?>"><?php html($field['title']); ?>: </div>
+            <?php $is_fields_group = !empty($ctype['options']['is_show_fields_group']) && $fieldset['title']; ?>
+
+            <?php if ($is_fields_group) { ?>
+                <div class="fields_group">
+                    <h3 class="group_title"><?php html($fieldset['title']); ?></h3>
             <?php } ?>
-            <div class="value"><?php echo $field['html']; ?></div>
-        </div>
+
+            <?php if (!empty($fieldset['fields'])) { ?>
+                <?php foreach ($fieldset['fields'] as $name => $field) { ?>
+
+                    <div class="field ft_<?php echo $field['type']; ?> f_<?php echo $field['name']; ?> <?php echo $field['options']['wrap_type']; ?>_field" <?php if($field['options']['wrap_width']){ ?> style="width: <?php echo $field['options']['wrap_width']; ?>;"<?php } ?>>
+                        <?php if ($field['options']['label_in_item'] != 'none') { ?>
+                            <div class="title_<?php echo $field['options']['label_in_item']; ?>"><?php html($field['title']); ?>: </div>
+                        <?php } ?>
+                        <div class="value"><?php echo $field['html']; ?></div>
+                    </div>
+
+                <?php } ?>
+            <?php } ?>
+
+            <?php if ($is_fields_group) { ?></div><?php } ?>
+
+        <?php } ?>
 
     <?php } ?>
 

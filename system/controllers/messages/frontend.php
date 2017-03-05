@@ -32,9 +32,7 @@ class messages extends cmsFrontend {
      * @param int $user_id
      */
     public function setSender($user_id){
-
-        $this->sender_id = $user_id;
-
+        $this->sender_id = $user_id; return $this;
     }
 
     /**
@@ -42,9 +40,7 @@ class messages extends cmsFrontend {
      * @param int $user_id
      */
     public function addRecipient($user_id){
-
-        $this->recipients[] = $user_id;
-
+        $this->recipients[] = $user_id; return $this;
     }
 
     /**
@@ -52,13 +48,11 @@ class messages extends cmsFrontend {
      * @param array $list
      */
     public function addRecipients($list){
-
-        $this->recipients = array_merge($this->recipients, $list);
-
+        $this->recipients = array_merge($this->recipients, $list); return $this;
     }
 
     public function clearRecipients(){
-        $this->recipients = array();
+        $this->recipients = array(); return $this;
     }
 
     /**
@@ -78,11 +72,15 @@ class messages extends cmsFrontend {
         // Сохраняем сообщение
         $message_id = $this->model->addMessage($this->sender_id, $this->recipients, $content);
 
-        // Обновляем даты последних сообщений в контактах
         if ($message_id){
+
+            // Обновляем даты последних сообщений в контактах
             foreach($this->recipients as $contact_id){
                 $this->model->updateContactsDateLastMsg($this->sender_id, $contact_id);
             }
+
+            cmsEventsManager::hook('send_user_message', array($this->sender_id, $this->recipients, $content));
+
         }
 
         return $message_id ? $message_id : false;
@@ -90,8 +88,7 @@ class messages extends cmsFrontend {
     }
 
     public function ignoreNotifyOptions(){
-        $this->is_ignore_options = true;
-        return $this;
+        $this->is_ignore_options = true; return $this;
     }
 
     /**
@@ -106,11 +103,9 @@ class messages extends cmsFrontend {
 
             if (!$this->recipients){ return; }
 
-            return $this->model->addNotice($this->recipients, $notice);
+            $notice_id = $this->model->addNotice($this->recipients, $notice);
 
-        }
-
-        if ($notice_type){
+        } else {
 
             $options_only = $this->is_ignore_options ? false : array('pm', 'both');
             $recipients = cmsCore::getModel('users')->getNotifiedUsers($notice_type, $this->recipients, $options_only);
@@ -119,9 +114,13 @@ class messages extends cmsFrontend {
 
             $this->is_ignore_options = false;
 
-            return $this->model->addNotice($recipients, $notice);
+            $notice_id = $this->model->addNotice($recipients, $notice);
 
         }
+
+        cmsEventsManager::hook('send_user_notice', array((isset($recipients) ? $recipients : $this->recipients), $notice));
+
+        return $notice_id;
 
     }
 
@@ -195,6 +194,17 @@ class messages extends cmsFrontend {
         ), $data);
 
         $letter['text'] = string_replace_keys_values($letter['text'], $data);
+
+        $before_send = cmsEventsManager::hook('before_send_email', array(
+            'send_email' => true,
+            'success'    => false,
+            'to'         => $to,
+            'letter'     => $letter
+        ));
+
+        if(!$before_send['send_email']){
+            return $before_send['success'];
+        }
 
         $mailer = new cmsMailer();
 

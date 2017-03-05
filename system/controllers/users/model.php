@@ -92,6 +92,45 @@ class modelUsers extends cmsModel{
 //============================================================================//
 //============================================================================//
 
+    public function setAuthToken($user_id, $auth_token, $type = null, $subj = null){
+
+        if(!$type){ $type = cmsRequest::getDeviceType(); }
+
+        return $this->insert('{users}_auth_tokens', array(
+            'ip'          => sprintf('%u', ip2long(cmsUser::getIp())),
+            'access_type' => cmsModel::arrayToYaml(array(
+                'type' => $type,
+                'subj' => $subj
+            )),
+            'auth_token'  => $auth_token,
+            'user_id'     => $user_id
+        ));
+
+    }
+
+    public function deleteExpiredToken($user_id, $auth_token_expiration_int){
+        return $this->filterEqual('user_id', $user_id)->
+                filterDateOlder('date_auth', $auth_token_expiration_int, 'SECOND')->
+                deleteFiltered('{users}_auth_tokens');
+    }
+
+    public function deleteAuthToken($auth_token){
+        return $this->filterEqual('auth_token', $auth_token)->deleteFiltered('{users}_auth_tokens');
+    }
+
+    public function deleteUserAuthTokens($user_id){
+        return $this->filterEqual('user_id', $user_id)->deleteFiltered('{users}_auth_tokens');
+    }
+
+    public function getUserAuthTokens($user_id){
+        return $this->filterEqual('user_id', $user_id)->get('{users}_auth_tokens', function ($item, $model){
+            $item['ip'] = long2ip($item['ip']);
+            $item['date_log'] = $item['date_log'] ? $item['date_log'] : $item['date_auth'];
+            $item['access_type'] = cmsModel::yamlToArray($item['access_type']);
+            return $item;
+        });
+    }
+
     public function getUserByPassToken($pass_token){
 
         return $this->filterEqual('pass_token', $pass_token)->getUser();
@@ -138,12 +177,12 @@ class modelUsers extends cmsModel{
         $groups = !empty($user['groups']) ? $user['groups'] : array(DEF_GROUP_ID);
 
         $user = array_merge($user, array(
-            'groups' => $groups,
-            'password' => $password_hash,
+            'groups'        => $groups,
+            'password'      => $password_hash,
             'password_salt' => $password_salt,
-            'date_reg' => $date_reg,
-            'date_log' => $date_log,
-			'time_zone' => cmsConfig::get('time_zone')
+            'date_reg'      => $date_reg,
+            'date_log'      => $date_log,
+            'time_zone'     => cmsConfig::get('time_zone')
         ));
 
         $id = $this->insert('{users}', $user);
@@ -158,12 +197,12 @@ class modelUsers extends cmsModel{
 
         }
 
-        cmsCache::getInstance()->clean("users.list");
+        cmsCache::getInstance()->clean('users.list');
 
         return array(
-            'success' => $id!==false,
-            'errors' => false,
-            'id' => $id
+            'success' => $id !== false,
+            'errors'  => false,
+            'id'      => $id
         );
 
     }
@@ -207,11 +246,15 @@ class modelUsers extends cmsModel{
 
         if (!$errors){
 
-            $user['groups'] = !empty($user['groups']) ? $user['groups'] : array(DEF_GROUP_ID);
+            if(isset($user['groups'])){
+
+                $user['groups'] = is_array($user['groups']) ? $user['groups'] : array(DEF_GROUP_ID);
+
+                $this->saveUserGroupsMembership($id, $user['groups']);
+
+            }
 
             $success = $this->update('{users}', $id, $user);
-
-            $this->saveUserGroupsMembership($id, $user['groups']);
 
         }
 
@@ -253,21 +296,41 @@ class modelUsers extends cmsModel{
 
 //============================================================================//
 //============================================================================//
+    /**
+     * Удаляет пользователя
+     * @param integer|array $user id пользователя или массив данных пользователя
+     * @return boolean
+     */
+    public function deleteUser($user){
 
-    public function deleteUser($id){
+        if(is_numeric($user)){
+            $user = $this->getUser($user);
+            if(!$user){ return false; }
+        }
 
-        $this->delete('{users}_friends', $id, 'user_id');
-        $this->delete('{users}_friends', $id, 'friend_id');
-        $this->delete('{users}_groups_members', $id, 'user_id');
-        $this->delete('{users}_karma', $id, 'user_id');
-        $this->delete('{users}_statuses', $id, 'user_id');
-        $this->delete('{users}_personal_settings', $id, 'user_id');
-        $this->delete('{users}', $id);
+        $content_model = cmsCore::getModel('content');
+        $content_model->setTablePrefix('');
+        $fields = $content_model->getContentFields('{users}', $user['id']);
+
+        foreach($fields as $field){
+            $field['handler']->delete($user[$field['name']]);
+        }
+
+        $this->deleteUserAuthTokens($user['id']);
+        $this->delete('{users}_friends', $user['id'], 'user_id');
+        $this->delete('{users}_friends', $user['id'], 'friend_id');
+        $this->delete('{users}_groups_members', $user['id'], 'user_id');
+        $this->delete('{users}_karma', $user['id'], 'user_id');
+        $this->delete('{users}_statuses', $user['id'], 'user_id');
+        $this->delete('{users}_personal_settings', $user['id'], 'user_id');
+        $this->delete('{users}', $user['id']);
 
         $inCache = cmsCache::getInstance();
         $inCache->clean('users.list');
         $inCache->clean('users.ups');
-        $inCache->clean('users.user.'.$id);
+        $inCache->clean('users.user.'.$user['id']);
+
+        return true;
 
     }
 
@@ -627,18 +690,18 @@ class modelUsers extends cmsModel{
 
             $friend = $this->getUser($friend_id);
 
-            cmsCore::getController('activity')->addEntry('users', "friendship", array(
+            cmsCore::getController('activity')->addEntry('users', 'friendship', array(
                 'subject_title' => $friend['nickname'],
-                'subject_id' => $friend_id,
-                'subject_url' => href_to('users', $friend_id),
+                'subject_id'    => $friend_id,
+                'subject_url'   => href_to_rel('users', $friend_id)
             ));
 
         }
 
-        cmsCache::getInstance()->clean("users.friends");
+        cmsCache::getInstance()->clean('users.friends');
 
         return $this->insert('{users}_friends', array(
-            'user_id' => $user_id,
+            'user_id'   => $user_id,
             'friend_id' => $friend_id,
             'is_mutual' => $is_mutual
         ));

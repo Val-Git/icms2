@@ -23,13 +23,18 @@ icms.datagrid = (function ($) {
         });
     };
     this.bind_filter = function(){
-        $('.datagrid .filter .input').on('input', function () {
-            $('.datagrid .filter .input').each(function(){
+        $('.datagrid .filter .input, .datagrid .filter .date-input').on('input', function () {
+            $('.datagrid .filter .input, .datagrid .filter .date-input').each(function(){
                 var filter = $(this).attr('rel');
                 $('#datagrid_filter input[name='+filter+']').val($(this).val());
             });
             icms.datagrid.setPage(1);
             icms.datagrid.loadRows();
+        });
+        $('.datagrid .filter .date-input').each(function(){
+            icms.events.on('icms_datepicker_selected_'+$(this).attr('id'), function(inst){
+                $('#'+$(inst).attr('id')).trigger('input');
+            });
         });
     };
 
@@ -61,15 +66,19 @@ icms.datagrid = (function ($) {
         }
 
         if (this.options.is_selectable){
-            var ctrl = false, shift = false;
+            var shift = false;
             var tbody = $('#datagrid > tbody');
             var last = tbody.find('> tr:not(.filter):first');
-            $(document).keydown(function(event) {
-                if(event.keyCode === 16){shift = true;$('#datagrid').disableSelection();}
-                if(event.keyCode === 17){ctrl = true;$('#datagrid').disableSelection();}
-                }).keyup(function(event){
-                if(event.keyCode === 16){shift = false;$('#datagrid').enableSelection();}
-                if(event.keyCode === 17){ctrl = false;$('#datagrid').enableSelection();}
+            $(document).keydown(function(event){
+                if(event.keyCode === 16){
+                    shift = true;
+                    try{$('#datagrid').disableSelection();}catch(e){}
+                }
+            }).keyup(function(event){
+                if(event.keyCode === 16){
+                    shift = false;
+                    try{$('#datagrid').enableSelection();}catch(e){}
+                }
             });
             $(document).on('click', '#datagrid > tbody > tr:not(.filter) > td', function(){
                 var tr = $(this).parent();
@@ -80,7 +89,7 @@ icms.datagrid = (function ($) {
                     if(in1 === in2){
                         tr.toggleClass('selected');
                     }else{
-                        tbody.find('> tr:not(.filter):gt('+((in1<in2 ? in1-2 : in2-1))+'):not(:gt('+((in1>in2 ? (in1-in2) : (in2-in1))-1)+'))').toggleClass('selected');
+                        tbody.find('> tr:not(.filter)').slice((in1<in2 ? in1-1 : in2), (in1<in2 ? in2-1 : in1)).toggleClass('selected');
                     }
                 }else{
                     tr.toggleClass('selected');
@@ -111,6 +120,43 @@ icms.datagrid = (function ($) {
                 $('#slide_cell').addClass('unslided');
             }
         }).triggerHandler('resize');
+        $(document).on('click', '.inline_submit', function(){
+            var s_button = $(this);
+            $(s_button).prop('disabled', true).parent().addClass('process_save');
+            var tr_wrap = $(this).closest('tr');
+            var action_url = $(this).data('action');
+            var fields = {};
+            $(tr_wrap).find('.grid_field_edit input.input').each(function (){
+                fields[$(this).attr('name')] = $(this).val();
+            });
+            $.post(action_url, {data: fields}, function(data){
+                $(s_button).prop('disabled', false).parent().removeClass('process_save');
+                if(data.error){ icms.modal.alert(data.error); } else {
+                    $(tr_wrap).find('.grid_field_edit').addClass('success').removeClass('edit_by_click_visible');
+                    $(tr_wrap).find('.grid_field_value').removeClass('edit_by_click_hidden');
+                    for(var _field in fields){
+                        var g_value_wrap = $(tr_wrap).find('.'+_field+'_grid_value');
+                        if($(g_value_wrap).children().length){
+                            $(g_value_wrap).find('*').last().html(data.values[_field]);
+                        } else {
+                            $(g_value_wrap).html(data.values[_field]);
+                        }
+                    }
+                }
+            }, 'json');
+            return false;
+        });
+        $(document).on('input', '.grid_field_edit input.input', function(){
+            $(this).parent().removeClass('success');
+        });
+        $(document).on('keypress', '.grid_field_edit input.input', function(e){
+            if (e.which == 13) {
+                $(this).closest('tr').find('.inline_submit').trigger('click');
+            }
+        });
+        $(document).on('click', '.grid_field_value.edit_by_click', function(){
+            $(this).addClass('edit_by_click_hidden').parent().find('.grid_field_edit').addClass('edit_by_click_visible').find('input.input').focus();
+        });
 
     }
 
@@ -183,7 +229,7 @@ icms.datagrid = (function ($) {
         var selected_rows_count = $('.datagrid tr.selected').length;
 
         if (this.options.is_selectable && !selected_rows_count) {
-            alert(LANG_LIST_NONE_SELECTED);
+            icms.modal.alert(LANG_LIST_NONE_SELECTED, 'ui_warning');
             return 0;
         }
 
@@ -241,7 +287,7 @@ icms.datagrid = (function ($) {
 
         this.is_loading = true;
 
-        setTimeout(this.showLoadIndicator, 500);
+        this.showLoadIndicator();
 
         var filter_query = $('#datagrid_filter').serialize();
 
@@ -348,7 +394,7 @@ icms.datagrid = (function ($) {
 
         icms.datagrid.options.pages_count = result.pages_count;
 
-		$('.datagrid .flag_trigger a').on('click', function(){
+		$('.datagrid .flag_trigger > a').on('click', function(){
 
 			var url = $(this).attr('href');
 			var link = $(this);
@@ -378,34 +424,20 @@ icms.datagrid = (function ($) {
 
         if (icms.datagrid.callback) { icms.datagrid.callback(); }
 
+        fitLayout();
+
     }
 
     //====================================================================//
 
     this.showLoadIndicator = function(){
         if (!this.is_loading) {return;}
-
         $('.datagrid_loading').show();
-
-        var pos = $('.datagrid tbody').offset();
-        var w = $('.datagrid tbody').width();
-        var h = $('.datagrid tbody').height();
-
-        var iw = $('.datagrid_loading .indicator').width();
-        var ih = $('.datagrid_loading .indicator').height();
-
-        var itop = h/2 - ih/2 - 4;
-        var ileft = w/2 - iw/2 - 4;
-
-        $('.datagrid_loading').css('left', pos.left+'px').css('top', pos.top+'px');
-        $('.datagrid_loading').css('width', w+'px').css('height', h+'px').css('line-height', h+'px');
-
-        $('.datagrid_loading .indicator').css('top', itop+'px').css('left', ileft+'px');
-    }
+    };
 
     this.hideLoadIndicator = function(){
-        $('.datagrid_loading').hide();
-    }
+        $('.datagrid_loading').fadeOut('fast');
+    };
 
 	this.escapeHtml = function(text) {
 		return text

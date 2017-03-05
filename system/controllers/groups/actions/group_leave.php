@@ -11,12 +11,14 @@ class actionGroupsGroupLeave extends cmsAction {
 
         if ($is_member && !$is_owner){
 
+            $group = cmsEventsManager::hook('group_before_leave', $group);
+
             $this->model->deleteMembership($group['id'], $this->cms_user->id);
 
-            cmsCore::getController('activity')->addEntry($this->name, "leave", array(
+            cmsCore::getController('activity')->addEntry($this->name, 'leave', array(
                 'subject_title' => $group['title'],
                 'subject_id'    => $group['id'],
-                'subject_url'   => href_to($this->name, $group['id']),
+                'subject_url'   => href_to_rel($this->name, $group['id']),
                 'group_id'      => $group['id']
             ));
 

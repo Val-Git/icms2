@@ -1,7 +1,9 @@
 <?php
 class admin extends cmsFrontend {
 
-    const perpage = 35;
+    protected $useOptions = true;
+
+    const perpage = 30;
 
     public $installer_upload_path = 'installer';
 
@@ -15,11 +17,6 @@ class admin extends cmsFrontend {
         if(!$this->isAllowByIp()){ cmsCore::error404(); }
 
         parent::before($action_name);
-
-        // если для админки свой шаблон
-        if($this->cms_config->template_admin){
-            $this->cms_template->setName($this->cms_config->template_admin);
-        }
 
         $this->cms_template->setLayout('admin');
 
@@ -41,7 +38,7 @@ class admin extends cmsFrontend {
 
     public function getAdminMenu(){
 
-        return array(
+        return cmsEventsManager::hook('adminpanel_menu', array(
 
             array(
                 'title' => LANG_CP_SECTION_CONTENT,
@@ -91,9 +88,9 @@ class admin extends cmsFrontend {
                 'options' => array(
                     'class' => 'item-settings'
                 )
-            ),
+            )
 
-        );
+        ));
 
     }
 
@@ -102,7 +99,7 @@ class admin extends cmsFrontend {
 
     public function getCtypeMenu($do='add', $id=null){
 
-        return array(
+        $ctype_menu = array(
 
             array(
                 'title' => LANG_CP_CTYPE_SETTINGS,
@@ -141,6 +138,18 @@ class admin extends cmsFrontend {
 
         );
 
+        list($ctype_menu, $do, $id) = cmsEventsManager::hook('admin_ctype_menu', array($ctype_menu, $do, $id));
+
+        if($do != 'add'){
+
+            $ctype = cmsCore::getModel('content')->getContentType($id);
+
+            list($ctype_menu, $ctype) = cmsEventsManager::hook('admin_'.$ctype['name'].'_ctype_menu', array($ctype_menu, $ctype));
+
+        }
+
+        return $ctype_menu;
+
     }
 
 //============================================================================//
@@ -148,7 +157,7 @@ class admin extends cmsFrontend {
 
     public function getSettingsMenu(){
 
-        return array(
+        return cmsEventsManager::hook('admin_settings_menu', array(
 
             array(
                 'title' => LANG_BASIC_OPTIONS,
@@ -159,7 +168,7 @@ class admin extends cmsFrontend {
                 'url' => href_to($this->name, 'settings', array('scheduler'))
             ),
 
-        );
+        ));
 
     }
 
@@ -204,6 +213,24 @@ class admin extends cmsFrontend {
 
         if (file_exists($this->cms_config->upload_path . $this->installer_upload_path . '/' . 'package')){
             $manifest['contents'] = $this->getPackageContentsList();
+            if($manifest['contents']){
+                if(!empty($manifest['contents']['system']['core'])){
+                    foreach ($manifest['contents']['system']['core'] as $file) {
+                        if(file_exists($this->cms_config->root_path . 'system/core/'.$file)){
+                            $manifest['notice_system_files'] = LANG_INSTALL_NOTICE_SYSTEM_FILE;
+                            break;
+                        }
+                    }
+                }
+                if(!empty($manifest['contents']['system']['config'])){
+                    foreach ($manifest['contents']['system']['config'] as $file) {
+                        if(file_exists($this->cms_config->root_path . 'system/config/'.$file)){
+                            $manifest['notice_system_files'] = LANG_INSTALL_NOTICE_SYSTEM_FILE;
+                            break;
+                        }
+                    }
+                }
+            }
         } else {
 			$manifest['contents'] = false;
 		}
@@ -239,7 +266,7 @@ class admin extends cmsFrontend {
 
     }
 
-    private function componentInstalled($manifest_package) {
+    public function componentInstalled($manifest_package) {
 
         $model = new cmsModel();
 
@@ -247,7 +274,7 @@ class admin extends cmsFrontend {
 
     }
 
-    private function widgetInstalled($manifest_package) {
+    public function widgetInstalled($manifest_package) {
 
         $model = new cmsModel();
 

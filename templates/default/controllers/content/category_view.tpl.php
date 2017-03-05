@@ -12,6 +12,7 @@
 		if (!empty($ctype['seo_title'])){ $seo_title = $ctype['seo_title']; }
 		if (!empty($category['seo_title'])){ $seo_title = $category['seo_title']; }
 		if (!$seo_title) { $seo_title = $page_header; }
+        if (!empty($current_dataset['title'])){ $seo_title .= ' · '.$current_dataset['title']; }
         $this->setPageTitle($seo_title);
     }
 
@@ -19,6 +20,8 @@
     if (!empty($ctype['seo_desc'])){ $this->setPageDescription($ctype['seo_desc']); }
     if (!empty($category['seo_keys'])){ $this->setPageKeywords($category['seo_keys']); }
     if (!empty($category['seo_desc'])){ $this->setPageDescription($category['seo_desc']); }
+    if (!empty($current_dataset['seo_keys'])){ $this->setPageKeywords($current_dataset['seo_keys']); }
+    if (!empty($current_dataset['seo_desc'])){ $this->setPageDescription($current_dataset['seo_desc']); }
 
     if ($ctype['options']['list_on'] && !$request->isInternal() && !$is_frontpage){
         $this->addBreadcrumb($list_header, href_to($base_url));
@@ -103,7 +106,7 @@
                 <?php $ds_selected = ($dataset == $set['name'] || (!$dataset && $ds_counter==0)); ?>
                 <li <?php if ($ds_selected){ ?>class="active"<?php } ?>>
 
-                    <?php if ($ds_counter > 0) { $ds_url = sprintf(href_to($base_ds_url), $set['name']); } ?>
+                    <?php if ($ds_counter > 0) { $ds_url = sprintf(rel_to_href($base_ds_url), $set['name']); } ?>
                     <?php if ($ds_counter == 0) { $ds_url = href_to($base_url, isset($category['slug']) ? $category['slug'] : ''); } ?>
 
                     <?php if ($ds_selected){ ?>
@@ -117,6 +120,15 @@
             <?php } ?>
         </ul>
     </div>
+    <?php if (!empty($current_dataset['description'])){ ?>
+    <div class="content_datasets_description">
+        <?php echo $current_dataset['description']; ?>
+    </div>
+    <?php } ?>
+<?php } ?>
+
+<?php if (!empty($category['description'])){?>
+    <div class="category_description"><?php echo $category['description']; ?></div>
 <?php } ?>
 
 <?php if ($subcats && $ctype['is_cats'] && !empty($ctype['options']['is_show_cats'])){ ?>
@@ -132,3 +144,10 @@
 <?php } ?>
 
 <?php echo $items_list_html; ?>
+
+<?php $hooks_html = cmsEventsManager::hookAll("content_{$ctype['name']}_items_html", array('category_view', $ctype, $category, $current_dataset)); ?>
+<?php if ($hooks_html) { ?>
+    <div class="sub_items_list">
+        <?php echo html_each($hooks_html); ?>
+    </div>
+<?php } ?>

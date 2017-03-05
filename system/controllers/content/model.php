@@ -10,8 +10,6 @@ class modelContent extends cmsModel{
 
     protected $pub_filter_disabled = false;
     protected $pub_filtered = false;
-    protected $approved_filter_disabled = false;
-    protected $approved_filtered = false;
 
     private static $all_ctypes = null;
 
@@ -375,13 +373,17 @@ class modelContent extends cmsModel{
     public function getDefaultContentFieldOptions(){
 
         return array(
-            'is_required' => 0,
-            'is_digits' => 0,
-            'is_number' => 0,
+            'is_required'     => 0,
+            'is_digits'       => 0,
+            'is_number'       => 0,
             'is_alphanumeric' => 0,
-            'is_email' => 0,
-            'is_unique' => 0,
-            'label_pos' => 'left'
+            'is_email'        => 0,
+            'is_unique'       => 0,
+            'label_in_list'   => 'none',
+            'label_in_item'   => 'none',
+            'wrap_type'       => 'auto',
+            'wrap_width'      => '',
+            'profile_value'   => '',
         );
 
     }
@@ -418,7 +420,9 @@ class modelContent extends cmsModel{
 
         }
 
-        $id = $this->insert($fields_table_name, $field);
+        $field['id'] = $this->insert($fields_table_name, $field);
+
+        cmsEventsManager::hook('ctype_field_after_add', array($field, $ctype_name, $this));
 
         cmsCache::getInstance()->clean("content.fields.{$ctype_name}");
 
@@ -445,7 +449,7 @@ class modelContent extends cmsModel{
             }
         }
 
-        return $id;
+        return $field['id'];
 
     }
 
@@ -707,6 +711,11 @@ class modelContent extends cmsModel{
 
         $result = $this->update($fields_table_name, $id, $field);
 
+        if ($result){
+            $field['id'] = $id;
+            cmsEventsManager::hook('ctype_field_after_update', array($field, $ctype_name, $this));
+        }
+
         cmsCache::getInstance()->clean("content.fields.{$ctype_name}");
 
         return $result;
@@ -771,8 +780,9 @@ class modelContent extends cmsModel{
         }
 
         $field = $this->getContentField($ctype_name, $id);
-
         if ($field['is_fixed']) { return false; }
+
+        cmsEventsManager::hook('ctype_field_before_delete', array($field, $ctype_name, $this));
 
         $content_table_name = $this->table_prefix . $ctype_name;
         $fields_table_name = $this->table_prefix . $ctype_name . '_fields';
@@ -904,11 +914,13 @@ class modelContent extends cmsModel{
 
         $cats_list = $prop['cats']; unset($prop['cats']);
 
-        $prop_id = $this->insert($table_name, $prop);
+        $prop['id'] = $this->insert($table_name, $prop);
 
-        $this->bindContentProp($ctype_name, $prop_id, $cats_list);
+        $this->bindContentProp($ctype_name, $prop['id'], $cats_list);
 
-        return $prop_id;
+        cmsEventsManager::hook('ctype_prop_after_add', array($prop, $ctype_name, $this));
+
+        return $prop['id'];
 
     }
 
@@ -933,7 +945,12 @@ class modelContent extends cmsModel{
 
         unset($prop['cats']);
 
-        return $this->update($table_name, $id, $prop);
+        $result = $this->update($table_name, $id, $prop);
+
+        $prop['id'] = $id;
+        cmsEventsManager::hook('ctype_prop_after_update', array($prop, $ctype_name, $this));
+
+        return $result;
 
     }
 
@@ -960,6 +977,8 @@ class modelContent extends cmsModel{
         $table_name = $this->table_prefix . $ctype_name . '_props';
 
         $prop = $this->getContentProp($ctype_name, $prop_id);
+
+        cmsEventsManager::hook('ctype_prop_before_delete', array($prop, $ctype_name, $this));
 
         foreach($prop['cats'] as $cat_id){
             $this->unbindContentProp($ctype_name, $prop_id, $cat_id);
@@ -1270,11 +1289,13 @@ class modelContent extends cmsModel{
 
         $dataset['index'] = $this->addContentDatasetIndex($dataset, $ctype['name']);
 
-        $id = $this->insert($table_name, $dataset);
+        $dataset['id'] = $this->insert($table_name, $dataset);
+
+        cmsEventsManager::hook('ctype_dataset_add', array($dataset, $ctype, $this));
 
         cmsCache::getInstance()->clean('content.datasets');
 
-        return $id;
+        return $dataset['id'];
 
     }
 
@@ -1283,6 +1304,9 @@ class modelContent extends cmsModel{
         $dataset['ctype_id'] = $ctype['id'];
 
         $success = $this->update('content_datasets', $id, $dataset);
+
+        $dataset['id'] = $id;
+        cmsEventsManager::hook('ctype_dataset_update', array($dataset, $ctype, $this));
 
         cmsCache::getInstance()->clean('content.datasets');
 
@@ -1328,6 +1352,8 @@ class modelContent extends cmsModel{
         $ctype = $this->getContentType($dataset['ctype_id']);
         if (!$ctype) { return false; }
 
+        cmsEventsManager::hook('ctype_dataset_before_delete', array($dataset, $ctype, $this));
+
         $this->delete('content_datasets', $id);
 
         $this->deleteContentDatasetIndex($ctype['name'], $dataset['index']);
@@ -1344,18 +1370,7 @@ class modelContent extends cmsModel{
 
     public function resetFilters(){
         parent::resetFilters();
-        $this->approved_filtered = false;
         $this->pub_filtered = false;
-        return $this;
-    }
-
-    public function enableApprovedFilter(){
-        $this->approved_filter_disabled = false;
-        return $this;
-    }
-
-    public function disableApprovedFilter(){
-        $this->approved_filter_disabled = true;
         return $this;
     }
 
@@ -1369,19 +1384,6 @@ class modelContent extends cmsModel{
         return $this;
     }
 
-    public function filterApprovedOnly(){
-
-        if ($this->approved_filtered) { return $this; }
-
-        // Этот фильтр может применяться при подсчете числа записей
-        // и при выборке самих записей
-        // используем флаг чтобы фильтр не применился дважды
-        $this->approved_filtered = true;
-
-        return $this->filterEqual('is_approved', 1);
-
-    }
-
 	public function filterPublishedOnly(){
 
 		if ($this->pub_filtered) { return $this; }
@@ -1392,9 +1394,19 @@ class modelContent extends cmsModel{
 
 	}
 
-    public function filterByModeratorTask($moderator_id, $ctype_name){
+    public function filterByModeratorTask($moderator_id, $ctype_name, $is_admin = false){
 
-        return $this->filter("(EXISTS (SELECT item_id FROM {#}moderators_tasks WHERE moderator_id='{$moderator_id}' AND ctype_name='{$ctype_name}' AND item_id=i.id))");
+        if($is_admin){
+
+            $this->joinInner('moderators_tasks', 'm', 'm.item_id = i.id');
+
+            return $this->filterEqual('m.ctype_name', $ctype_name);
+
+        } else {
+
+            return $this->filter("(EXISTS (SELECT item_id FROM {#}moderators_tasks WHERE moderator_id='{$moderator_id}' AND ctype_name='{$ctype_name}' AND item_id=i.id))");
+
+        }
 
     }
 
@@ -1575,7 +1587,7 @@ class modelContent extends cmsModel{
 
         $pattern = trim($ctype['url_pattern'], '/');
 
-        preg_match_all('/{([a-zA-Z0-9\_]+)}/i', $pattern, $matches);
+        preg_match_all('/{([a-z0-9\_]+)}/i', $pattern, $matches);
 
         if (!$matches) { return lang_slug($item['id']); }
 
@@ -1816,6 +1828,28 @@ class modelContent extends cmsModel{
 //============================================================================//
 //============================================================================//
 
+    public function getContentItemsForSitemap($ctype_name, $fields = array()){
+
+        $table_name = $this->table_prefix . $ctype_name;
+
+        $this->selectOnly('slug');
+        $this->select('date_last_modified');
+        if($fields){
+            foreach ($fields as $field) {
+                $this->select($field);
+            }
+        }
+
+        if (!$this->privacy_filter_disabled) { $this->filterPrivacy(); }
+        if (!$this->approved_filter_disabled) { $this->filterApprovedOnly(); }
+        if (!$this->pub_filter_disabled) { $this->filterPublishedOnly(); }
+
+        if (!$this->order_by){ $this->orderBy('date_pub', 'desc')->forceIndex('date_pub'); }
+
+        return $this->get($table_name);
+
+    }
+
     public function getContentItems($ctype_name){
 
         $table_name = $this->table_prefix . $ctype_name;
@@ -1856,11 +1890,9 @@ class modelContent extends cmsModel{
 
         $table_name = $this->table_prefix . $ctype_name;
 
-        $this->select('u.nickname', 'user_nickname');
-        $this->select('u.avatar', 'user_avatar');
         $this->select('f.title', 'folder_title');
 
-        $this->join('{users}', 'u', 'u.id = i.user_id');
+        $this->joinUser();
         $this->joinLeft('content_folders', 'f', 'f.id = i.folder_id');
 
         $this->useCache("content.item.{$ctype_name}");
@@ -1868,8 +1900,9 @@ class modelContent extends cmsModel{
         return $this->getItemByField($table_name, $by_field, $id, function($item, $model){
 
             $item['user'] = array(
-                'id' => $item['user_id'],
-                'nickname' => $item['user_nickname']
+                'id'       => $item['user_id'],
+                'nickname' => $item['user_nickname'],
+                'avatar'   => $item['user_avatar']
             );
 
             return $item;
@@ -1901,7 +1934,7 @@ class modelContent extends cmsModel{
 
     }
 
-    public function getUserContentCounts($user_id, $is_filter_hidden=false){
+    public function getUserContentCounts($user_id, $is_filter_hidden=false, $access_callback = false){
 
         $counts = array();
 
@@ -1919,6 +1952,14 @@ class modelContent extends cmsModel{
         }
 
         foreach($ctypes as $ctype){
+
+            if(is_callable($access_callback) && !$access_callback($ctype)){
+                continue;
+            }
+		
+	    if(!$ctype['options']['profile_on']){
+                continue;
+            }
 
             $count = $this->getContentItemsCount( $ctype['name'] );
 
@@ -2222,13 +2263,13 @@ class modelContent extends cmsModel{
 
         return $this->insert('moderators_tasks', array(
             'moderator_id' => $user_id,
-            'author_id' => $item['user_id'],
-            'item_id' => $item['id'],
-            'ctype_name' => $ctype_name,
-            'title' => $item['title'],
-            'url' => href_to($ctype_name, $item['slug'].".html"),
-            'date_pub' => '',
-            'is_new_item' => $is_new_item
+            'author_id'    => $item['user_id'],
+            'item_id'      => $item['id'],
+            'ctype_name'   => $ctype_name,
+            'title'        => $item['title'],
+            'url'          => href_to_rel($ctype_name, $item['slug'] . '.html'),
+            'date_pub'     => '',
+            'is_new_item'  => $is_new_item
         ));
 
     }
